@@ -1,10 +1,10 @@
-import { t, L, setLang, getLang } from './i18n.js?v=23';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=23';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=23';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=23';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=23';
-import { claudeReply } from './claude.js?v=23';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=23';
+import { t, L, setLang, getLang } from './i18n.js?v=24';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=24';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=24';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=24';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=24';
+import { claudeReply } from './claude.js?v=24';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=24';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -435,6 +435,7 @@ async function respond(id, trigger, { toy = false, avatarImage = null } = {}) {
     update(st => {
       const cs2 = st.chars[id];
       if (demo.learned.name) { if (!cs2.callMe) cs2.callMe = demo.learned.name; if (!st.profile.name) st.profile.name = demo.learned.name; cs2.memories.push({ id: newId(), kind: 'name', text: (lang === 'zh' ? '名字是 ' : 'Name: ') + demo.learned.name, ts: Date.now() }); }
+      if (demo.nudged) cs2.lastNudge = Date.now();
       if (demo.learned.like) cs2.memories.push({ id: newId(), kind: 'like', value: demo.learned.like, text: (lang === 'zh' ? '喜欢' : 'Likes ') + demo.learned.like, ts: Date.now() });
     });
     const mode = cs.replyMode;
