@@ -40,6 +40,12 @@ A WeChat-style messenger where the contacts are virtual characters with personal
 | 演示模式（默认）| 内置每个角色的台词，按关系阶段从冷淡到亲密变化，会记住你的名字和喜好。不需要任何账号，离线可用。 |
 | 真实 AI | 在"我 → AI 连接"里填入你自己的 Anthropic API Key，改用 Claude（`claude-opus-5-5`）实时回复，并能看懂你发的照片和头像。Key 只保存在你这台设备的浏览器里。 |
 
+## 试玩测试 · Play test
+
+`test.html` 是给 5 位玩家用的试玩测试：三个任务（纠正记忆、看懂关系阶段、分清两个角色），自动计时和判断，结果可导出。主持人手册见 [TESTING.md](TESTING.md)。
+
+`test.html` runs a 15-minute play test (fix a memory, find the relationship stage, tell two characters apart) with automatic timing and export. Facilitator guide: [TESTING.md](TESTING.md).
+
 ## 技术 · Tech
 
 - 纯 HTML / CSS / JavaScript（ES modules），无需构建，托管在 GitHub Pages

@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>试玩测试 · 悄悄话</title>
+<style>
+  :root { --bg: #FFF4F6; --card: #FFFFFF; --ink: #3A2530; --muted: #7F6370; --line: #F2D9E0; --soft: #FBE9EE; --acc: #C2416A; --on-acc: #FFFFFF; --ok: #2E7D5B; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #17141A; --card: #211D25; --ink: #EEE8F0; --muted: #A79EAB; --line: #3A3340; --soft: #2B2630; --acc: #E07A88; --on-acc: #17141A; --ok: #7FD1A8; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); height: 100%; }
+  .stage { position: relative; min-width: 0; }
+  .stage iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .stage .cover { position: absolute; inset: 0; display: grid; place-items: center; background: var(--bg); color: var(--muted); padding: 24px; text-align: center; }
+  aside { border-left: 1px solid var(--line); background: var(--card); overflow-y: auto; padding: 22px 20px 40px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 0 0 8px; }
+  p { margin: 0 0 10px; }
+  .muted { color: var(--muted); font-size: 13.5px; }
+  .step { font-size: 12px; color: var(--acc); font-weight: 700; letter-spacing: .04em; margin-bottom: 6px; }
+  .box { background: var(--soft); border-radius: 14px; padding: 14px; margin: 12px 0; }
+  ul.rules { margin: 6px 0 10px; padding-left: 18px; font-size: 14px; }
+  label.row { display: flex; gap: 10px; align-items: flex-start; margin: 8px 0; cursor: pointer; font-size: 14.5px; }
+  input[type=text], textarea { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+  textarea { min-height: 80px; }
+  .btn { display: inline-block; font: inherit; font-weight: 600; border: 0; border-radius: 99px; padding: 9px 18px; background: var(--acc); color: var(--on-acc); cursor: pointer; }
+  .btn.ghost { background: var(--soft); color: var(--ink); font-weight: 500; }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .acts { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+  .done { color: var(--ok); font-weight: 600; font-size: 14px; }
+  .scale { display: flex; gap: 6px; margin: 6px 0 14px; }
+  .scale label { flex: 1; text-align: center; border: 1px solid var(--line); border-radius: 10px; padding: 6px 0; cursor: pointer; font-size: 14px; }
+  .scale input { display: none; }
+  .scale input:checked + span { color: var(--acc); font-weight: 700; }
+  .scale label:has(input:checked) { border-color: var(--acc); background: var(--soft); }
+  .ends { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-top: -10px; margin-bottom: 14px; }
+  .quote { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; margin: 8px 0; }
+  .lang { float: right; font-size: 12.5px; }
+  .lang button { border: 0; background: none; color: var(--muted); cursor: pointer; font: inherit; }
+  .lang button.on { color: var(--acc); font-weight: 700; }
+  pre { white-space: pre-wrap; word-break: break-all; font-size: 11.5px; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; max-height: 260px; overflow: auto; }
+  :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+  @media (max-width: 820px) { .layout { grid-template-columns: minmax(0, 1fr); grid-template-rows: 62vh auto; height: auto; } .stage { height: 62vh; } aside { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div class="layout">
+  <div class="stage"><iframe id="app" title="悄悄话 App" allow="microphone; camera"></iframe><div class="cover" id="cover"></div></div>
+  <aside id="panel" aria-live="polite"></aside>
+</div>
+<script type="module">
+// Play test for the Whisper companion app. Everything stays in this browser: the tester's own
+// app data is backed up before the test and can be restored at the end.
+import { CHARACTERS } from './js/data.js?v=22';
+
+const APP_KEY = 'whisper.v1', BACKUP_KEY = 'whisper.v1.before-test', LOG_KEY = 'whisper.test.logs';
+const MEM_ID = 'fixture-strawberry';
+let lang = 'zh';
+const T = {
+  zh: {
+    title: '悄悄话 · 试玩测试', intro: '谢谢你来试玩！这是一个还在设计中的 App，测的是 App 好不好用，不是测你。大约 15 分钟。',
+    rules: ['想到什么可以直接说出来，说“我卡住了”也完全没问题。', '不要输入真实的个人信息（真名、电话、地址）。', '你的操作会被记录在这台电脑的浏览器里，只用于改进设计；你原来的 App 数据会先备份，结束后可以恢复。'],
+    pid: '参与者编号（例如 P1，不写名字）', consent: '我已满 18 岁，同意参加这次试玩并被记录操作。', start: '开始',
+    t1: '任务 1 / 3', t1q: '温叙记错了一件事：他以为你喜欢草莓。请在 App 里把这条记忆改对，或者删掉。', t1done: '完成了',
+    t2: '任务 2 / 3', t2q: '现在你和温叙是什么关系阶段？在 App 里找到答案，然后在下面选择。', stages: ['初识', '熟悉', '暧昧', '心意相通'], next: '下一步', skip: '跳过这个任务',
+    t3: '任务 3 / 3', t3q: '分别给温叙和季屿发一句“今天好累”。两个人都回复以后，下面会出现两句回复（不写名字）。', t3wait: '等两个人都回复……', t3pick: '你觉得哪一句是温叙说的？', a: '回复 A', b: '回复 B', sure: '你有多确定？',
+    q: '最后几个问题', q1: '我能看懂他现在和我是什么关系。', q2: '我能分清两个角色说话的不同。', q3: '我觉得自己能控制他记住什么。', agree: ['完全不同意', '完全同意'],
+    open: '哪一刻让你觉得他像一个真的人？哪一刻让你出戏？', finish: '提交',
+    thanks: '谢谢你！测试结束了。', export: '把下面的记录发给 Wei（复制或截图都可以）。', copy: '复制记录', copied: '已复制', csv: '复制为表格一行', restore: '恢复我原来的 App 数据', restored: '已恢复', again: '下一位参与者',
+    loading: '正在准备测试用的 App……', s: '秒',
+  },
+  en: {
+    title: 'Whisper · play test', intro: 'Thanks for trying the app! It is still being designed, and we are testing the app, not you. About 15 minutes.',
+    rules: ['Think out loud. Saying “I’m stuck” is completely fine.', 'Please don’t type real personal details (real name, phone, address).', 'Your actions are logged in this browser only, to improve the design. Your own app data is backed up first and can be restored at the end.'],
+    pid: 'Participant ID (e.g. P1, no names)', consent: 'I am 18 or older and agree to take part and have my actions logged.', start: 'Start',
+    t1: 'Task 1 / 3', t1q: 'Wen Xu remembers something wrong: he thinks you like strawberries. Fix that memory in the app, or delete it.', t1done: 'Done',
+    t2: 'Task 2 / 3', t2q: 'What relationship stage are you at with Wen Xu? Find it in the app, then choose below.', stages: ['Strangers', 'Friends', 'Something more', 'Mutual'], next: 'Next', skip: 'Skip this task',
+    t3: 'Task 3 / 3', t3q: 'Send “so tired today” to both Wen Xu and Ji Yu. Once both have replied, their two replies appear below without names.', t3wait: 'Waiting for both replies…', t3pick: 'Which one do you think is Wen Xu?', a: 'Reply A', b: 'Reply B', sure: 'How sure are you?',
+    q: 'A few last questions', q1: 'I can tell what our relationship stage is.', q2: 'I can tell the two characters apart by how they talk.', q3: 'I feel in control of what he remembers.', agree: ['Strongly disagree', 'Strongly agree'],
+    open: 'When did he feel like a real person? When did it break the spell?', finish: 'Submit',
+    thanks: 'Thank you! The test is over.', export: 'Send this record to Wei (copy or screenshot).', copy: 'Copy record', copied: 'Copied', csv: 'Copy as a table row', restore: 'Restore my own app data', restored: 'Restored', again: 'Next participant',
+    loading: 'Preparing the test app…', s: 's',
+  },
+};
+const t = k => T[lang][k];
+const $ = s => document.querySelector(s);
+const panel = $('#panel'), frame = $('#app'), cover = $('#cover');
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const app = () => { try { return JSON.parse(localStorage.getItem(APP_KEY) || 'null'); } catch (e) { return null; } };
+
+let log = null;               // the current participant's record
+let taskT0 = 0, screens = [], lastHash = '', poll = null, t3Start = 0, t3Pair = null;
+const now = () => Date.now();
+function event(type, data = {}) { if (log) log.events.push({ t: Math.round((now() - log.started) / 100) / 10, type, ...data }); }
+
+// ---------- the test scenario ----------
+// A fresh app state: onboarded, Wen Xu on the toy at "Friends" with one wrong memory, Ji Yu added,
+// proactive messages and auto-play off so nothing interrupts a task.
+async function loadFixture() {
+  try { const cur = localStorage.getItem(APP_KEY); if (cur && !localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, cur); } catch (e) {}
+  localStorage.removeItem(APP_KEY);
+  const store = await import('./js/store.js?v=22&fixture=' + now());
+  store.update(s => {
+    s.onboarded = true;
+    s.settings.lang = lang; s.settings.autoplay = false; s.settings.proactive = false; s.settings.aiMode = 'demo';
+    s.profile.name = log.pid;
+    s.toy.charId = 'wenxu'; s.face.charId = 'wenxu';
+    for (const id of Object.keys(s.chars)) { s.chars[id].pinned = id === 'wenxu'; s.chars[id].unread = 0; s.messages[id] = []; }
+    Object.assign(s.chars.wenxu, { owned: true, affinity: 34, memories: [{ id: MEM_ID, kind: 'like', value: lang === 'zh' ? '草莓' : 'strawberries', text: lang === 'zh' ? '喜欢草莓' : 'Likes strawberries', ts: now() }] });
+    Object.assign(s.chars.jiyu, { owned: true, affinity: 34, metAt: now() - 8 * 864e5 });
+  });
+  await new Promise(r => setTimeout(r, 400));     // the store writes after 120 ms
+}
+function openApp() {
+  cover.hidden = false; cover.textContent = t('loading');
+  frame.src = './index.html?frame=0&lang=' + lang + '&r=' + now() + '#/chats';
+  frame.onload = () => { cover.hidden = true; };
+}
+function watch(check) {
+  clearInterval(poll);
+  poll = setInterval(() => {
+    try { const h = frame.contentWindow.location.hash; if (h && h !== lastHash) { lastHash = h; screens.push(h); event('screen', { hash: h }); } } catch (e) {}
+    check && check();
+  }, 400);
+}
+function startTask(name) { taskT0 = now(); screens = []; event('task-start', { task: name }); }
+function endTask(name, extra) {
+  const r = { task: name, seconds: Math.round((now() - taskT0) / 100) / 10, screens: screens.length, path: screens.slice(0, 30), ...extra };
+  log.tasks.push(r); event('task-end', r); return r;
+}
+
+// ---------- screens of the panel ----------
+function intro() {
+  clearInterval(poll); cover.hidden = false; cover.textContent = ''; frame.removeAttribute('src');
+  panel.innerHTML = `<div class="lang"><button data-l="zh" class="${lang === 'zh' ? 'on' : ''}">中文</button> · <button data-l="en" class="${lang === 'en' ? 'on' : ''}">EN</button></div>
+    <h1>${t('title')}</h1><p class="muted">${t('intro')}</p>
+    <ul class="rules">${t('rules').map(r => `<li>${r}</li>`).join('')}</ul>
+    <div class="box"><label for="pid" class="muted">${t('pid')}</label><input id="pid" type="text" maxlength="12" value="P${(readLogs().length || 0) + 1}">
+    <label class="row"><input type="checkbox" id="ok"><span>${t('consent')}</span></label></div>
+    <button class="btn" id="go" disabled>${t('start')}</button>`;
+  panel.querySelectorAll('[data-l]').forEach(b => b.onclick = () => { lang = b.dataset.l; intro(); });
+  $('#ok').onchange = () => { $('#go').disabled = !$('#ok').checked; };
+  $('#go').onclick = async () => {
+    log = { pid: ($('#pid').value || 'P').trim().slice(0, 12), lang, started: now(), startedAt: new Date().toISOString(), ua: navigator.userAgent, tasks: [], answers: {}, events: [] };
+    event('consent');
+    await loadFixture(); openApp(); task1();
+  };
+}
+
+function task1() {
+  startTask('fix-memory');
+  panel.innerHTML = `<div class="step">${t('t1')}</div><h2>${t('t1q')}</h2>
+    <p class="done" id="st" hidden></p><div class="acts"><button class="btn ghost" id="skip">${t('skip')}</button></div>`;
+  let finished = false;
+  const finish = (how) => { if (finished) return; finished = true; endTask('fix-memory', { success: how !== 'skipped', how }); $('#st').hidden = false; $('#st').textContent = '✓ ' + t('t1done'); setTimeout(task2, 1200); };
+  watch(() => {
+    const s = app(); if (!s) return;
+    const m = (s.chars.wenxu.memories || []).find(x => x.id === MEM_ID);
+    if (!m) finish('deleted');
+    else if (!/草莓|strawberr/i.test(m.text)) finish('edited');
+  });
+  $('#skip').onclick = () => finish('skipped');
+}
+
+function task2() {
+  startTask('find-stage');
+  panel.innerHTML = `<div class="step">${t('t2')}</div><h2>${t('t2q')}</h2>
+    ${t('stages').map((s, i) => `<label class="row"><input type="radio" name="stg" value="${i}"><span>${s}</span></label>`).join('')}
+    <div class="acts"><button class="btn" id="nx" disabled>${t('next')}</button><button class="btn ghost" id="skip">${t('skip')}</button></div>`;
+  watch();
+  panel.querySelectorAll('[name=stg]').forEach(r => r.onchange = () => { $('#nx').disabled = false; });
+  const go = (skipped) => {
+    const v = panel.querySelector('[name=stg]:checked');
+    const s = app(); const truth = s ? [0, 25, 50, 80].filter(x => s.chars.wenxu.affinity >= x).length - 1 : 1;
+    endTask('find-stage', { success: !skipped && v && +v.value === truth, answer: v ? +v.value : null, truth, skipped: !!skipped });
+    task3();
+  };
+  $('#nx').onclick = () => go(false); $('#skip').onclick = () => go(true);
+}
+
+function task3() {
+  startTask('tell-apart'); t3Start = now(); t3Pair = null;
+  panel.innerHTML = `<div class="step">${t('t3')}</div><h2>${t('t3q')}</h2><p class="muted" id="wait">${t('t3wait')}</p><div id="pair"></div>
+    <div class="acts"><button class="btn ghost" id="skip">${t('skip')}</button></div>`;
+  const firstReply = (s, id) => (s.messages[id] || []).find(m => m.from === 'him' && m.ts >= t3Start && !m.proactive && !m.stageEvent);
+  watch(() => {
+    if (t3Pair) return;
+    const s = app(); if (!s) return;
+    const w = firstReply(s, 'wenxu'), j = firstReply(s, 'jiyu');
+    if (!w || !j) return;
+    const wenFirst = Math.random() < 0.5;
+    t3Pair = { A: wenFirst ? w.text : j.text, B: wenFirst ? j.text : w.text, wenxuIs: wenFirst ? 'A' : 'B' };
+    $('#wait').hidden = true;
+    $('#pair').innerHTML = `<div class="quote"><b>${t('a')}</b><br>${esc(t3Pair.A)}</div><div class="quote"><b>${t('b')}</b><br>${esc(t3Pair.B)}</div>
+      <p><b>${t('t3pick')}</b></p><label class="row"><input type="radio" name="who" value="A"><span>${t('a')}</span></label><label class="row"><input type="radio" name="who" value="B"><span>${t('b')}</span></label>
+      <p class="muted" style="margin-top:8px">${t('sure')}</p>${scale('sure3')}<div class="ends"><span>1</span><span>5</span></div>
+      <button class="btn" id="nx" disabled>${t('next')}</button>`;
+    panel.querySelectorAll('[name=who],[name=sure3]').forEach(r => r.onchange = () => { $('#nx').disabled = !(panel.querySelector('[name=who]:checked') && panel.querySelector('[name=sure3]:checked')); });
+    $('#nx').onclick = () => {
+      const who = panel.querySelector('[name=who]:checked').value;
+      endTask('tell-apart', { success: who === t3Pair.wenxuIs, picked: who, wenxuIs: t3Pair.wenxuIs, sure: +panel.querySelector('[name=sure3]:checked').value, replies: t3Pair });
+      survey();
+    };
+  });
+  $('#skip').onclick = () => { endTask('tell-apart', { success: false, skipped: true }); survey(); };
+}
+
+function scale(name) { return `<div class="scale">${[1, 2, 3, 4, 5].map(n => `<label><input type="radio" name="${name}" value="${n}"><span>${n}</span></label>`).join('')}</div>`; }
+function survey() {
+  clearInterval(poll); event('survey');
+  const item = (k) => `<p>${t(k)}</p>${scale(k)}<div class="ends"><span>${t('agree')[0]}</span><span>${t('agree')[1]}</span></div>`;
+  panel.innerHTML = `<h2>${t('q')}</h2>${item('q1')}${item('q2')}${item('q3')}<p>${t('open')}</p><textarea id="open"></textarea>
+    <div class="acts"><button class="btn" id="fin">${t('finish')}</button></div>`;
+  $('#fin').onclick = () => {
+    for (const k of ['q1', 'q2', 'q3']) { const v = panel.querySelector(`[name=${k}]:checked`); log.answers[k] = v ? +v.value : null; }
+    log.answers.open = $('#open').value.trim();
+    log.minutes = Math.round((now() - log.started) / 6000) / 10;
+    event('finish'); saveLog(log); thanks();
+  };
+}
+
+function readLogs() { try { return JSON.parse(localStorage.getItem(LOG_KEY) || '[]'); } catch (e) { return []; } }
+function saveLog(l) { const all = readLogs(); all.push(l); try { localStorage.setItem(LOG_KEY, JSON.stringify(all)); } catch (e) {} }
+function csvRow(l) {
+  const tk = n => l.tasks.find(x => x.task === n) || {};
+  const cells = [l.pid, l.startedAt, l.minutes,
+    tk('fix-memory').success, tk('fix-memory').how, tk('fix-memory').seconds, tk('fix-memory').screens,
+    tk('find-stage').success, tk('find-stage').seconds, tk('find-stage').screens,
+    tk('tell-apart').success, tk('tell-apart').sure, tk('tell-apart').seconds,
+    l.answers.q1, l.answers.q2, l.answers.q3, (l.answers.open || '').replace(/\s+/g, ' ')];
+  return cells.map(c => `"${String(c ?? '').replace(/"/g, '""')}"`).join(',');
+}
+function thanks() {
+  const rec = JSON.stringify({ ...log, events: log.events.length + ' events (kept on this device)' }, null, 2);
+  panel.innerHTML = `<h2>${t('thanks')}</h2><p class="muted">${t('export')}</p><pre id="rec">${esc(rec)}</pre>
+    <div class="acts"><button class="btn" id="cp">${t('copy')}</button><button class="btn ghost" id="csv">${t('csv')}</button></div>
+    <div class="acts"><button class="btn ghost" id="rs">${t('restore')}</button><button class="btn ghost" id="ag">${t('again')}</button></div>`;
+  const copy = async (text, btn) => { try { await navigator.clipboard.writeText(text); btn.textContent = t('copied'); } catch (e) { const r = document.createRange(); r.selectNodeContents($('#rec')); getSelection().removeAllRanges(); getSelection().addRange(r); } };
+  $('#cp').onclick = e => copy(JSON.stringify(log, null, 2), e.target);
+  $('#csv').onclick = e => copy(csvRow(log), e.target);
+  $('#rs').onclick = e => { try { const b = localStorage.getItem(BACKUP_KEY); if (b) localStorage.setItem(APP_KEY, b); else localStorage.removeItem(APP_KEY); localStorage.removeItem(BACKUP_KEY); } catch (er) {} e.target.textContent = t('restored'); frame.removeAttribute('src'); cover.hidden = false; };
+  $('#ag').onclick = () => { log = null; intro(); };
+}
+
+intro();
+</script>
+</body>
+</html>
