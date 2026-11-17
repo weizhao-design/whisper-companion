@@ -1,10 +1,10 @@
-import { t, L, setLang, getLang } from './i18n.js?v=22';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=22';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=22';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=22';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=22';
-import { claudeReply } from './claude.js?v=22';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=22';
+import { t, L, setLang, getLang } from './i18n.js?v=23';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=23';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=23';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=23';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=23';
+import { claudeReply } from './claude.js?v=23';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=23';
 
 const app = document.getElementById('app');
 const S = () => getState();

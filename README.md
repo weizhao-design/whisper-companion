@@ -25,11 +25,11 @@ Open it on your phone and use "Add to Home Screen" to run it full-screen like a 
 - **玩具**：连接引导、实时镜像（玩具圆屏上此刻的表情：待机 / 聆听 / 思考 / 说话）、在 App 里模拟按住玩具按钮说话
 - **我**：换头像（他会注意到并聊起来）、全英文模式、日间粉 / 夜间配色、回复语言跟随你的消息
 
-角色全部原创：温叙（建筑师）、程朔（急诊科医生）、季屿（乐队主唱）、林柚（摄影系学生）。每个角色有自己的说话规则、关系阶段事件、专属称呼和作息；开会、值班、演出时回得慢、回得短。
+角色全部原创：姜道允（首尔品牌设计师，放在玩具上的主要角色）、温叙（建筑师）、程朔（急诊科医生）、季屿（乐队主唱）、林柚（摄影系学生）。每个角色有自己的说话规则、关系阶段事件、专属称呼和作息；开会、值班、演出时回得慢、回得短。
 
 ## What it is
 
-All characters are original: Wen Xu (architect), Cheng Shuo (ER doctor), Ji Yu (band vocalist) and Lin You (photography student). Each has his own speech rules, stage-up lines, a nickname for you and a daily schedule; in meetings, on shift or on stage he replies late and short.
+All characters are original: Kang Doyun (Seoul brand designer, the main character on the toy), Wen Xu (architect), Cheng Shuo (ER doctor), Ji Yu (band vocalist) and Lin You (photography student). Each has his own speech rules, stage-up lines, a nickname for you and a daily schedule; in meetings, on shift or on stage he replies late and short.
 
 A WeChat-style messenger where the contacts are virtual characters with personalities and memory, linked to a heart-shaped AI companion toy on your desk. Fully bilingual (中文 / English): switch the whole app in Me → Language, and he replies in whichever language you write or speak in.
 

@@ -1,5 +1,5 @@
 // App state, persisted to localStorage on this device only.
-import { CHARACTERS } from './data.js?v=22';
+import { CHARACTERS } from './data.js?v=23';
 
 const KEY = 'whisper.v1';
 export const STAGES = [0, 25, 50, 80, 101];
@@ -15,17 +15,18 @@ function seed() {
     messages: {},
     toy: { connected: false, charId: 'wenxu', muted: false, playWhere: 'both', volume: 80, quiet: true, idleFace: 'smile', dim: true, brightness: 70, name: '' },
     avatarPending: [],
-    face: { charId: 'wenxu', state: 'idle' },
+    face: { charId: 'doyun', state: 'idle' },
   };
   for (const c of CHARACTERS) { s.chars[c.id] = charSeed(c, now); s.messages[c.id] = []; }
-  s.toy.charId = 'wenxu';
+  s.toy.charId = 'doyun';
   return s;
 }
 
-// Starting relationship for each character: Wen Xu is the one on the toy,
+// Starting relationship for each character: Doyun is the one on the toy,
 // so he starts furthest along.
 const PRESET = {
-  wenxu: { aff: 62, sync: 70, days: 30, pinned: true, moments: [['mStage', 2, 5], ['mFirstGift', null, 12], ['mFirstVoice', null, 24], ['mMet', null, 30]] },
+  doyun: { aff: 62, sync: 70, days: 30, pinned: true, moments: [['mStage', 2, 5], ['mFirstGift', null, 12], ['mFirstVoice', null, 24], ['mMet', null, 30]] },
+  wenxu: { aff: 52, sync: 55, days: 20, moments: [['mStage', 2, 5], ['mFirstGift', null, 12], ['mFirstVoice', null, 24], ['mMet', null, 30]] },
   chengshuo: { aff: 34, sync: 40, days: 12, moments: [['mStage', 1, 3], ['mMet', null, 12]] },
 };
 function charSeed(c, now) {

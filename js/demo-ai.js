@@ -1,7 +1,7 @@
 // Offline "demo" reply engine: intent matching + per-character lines.
-import { L, isZh } from './i18n.js?v=22';
-import { nowDoing, isBusy } from './data.js?v=22';
-import { stageOf } from './store.js?v=22';
+import { L, isZh } from './i18n.js?v=23';
+import { nowDoing, isBusy } from './data.js?v=23';
+import { stageOf } from './store.js?v=23';
 
 const RX = {
   love: /(喜欢你|爱你|我喜欢你|i love you|love you|i like you|like you a lot)/i,
@@ -104,7 +104,8 @@ export function demoReply({ char, cs, state, msg }) {
   }
   // Busy slot (meeting, shift, gig, class): one line about being busy, then a single short reply.
   const busy = isBusy(char);
-  if (busy && lines.busy) out.splice(0, out.length, say('busy'), ...out.slice(0, 1));
+  // (line 3 of his busy lines is the "I'm free now" one, kept for the message he sends after the slot)
+  if (busy && lines.busy) out.splice(0, out.length, fill(pick(lines.busy[lang].filter((_, i) => i !== 2), stage), ctx), ...out.slice(0, 1));
   // Between 1 and 5 am he tells you to go to sleep, in his own words.
   const h = new Date().getHours();
   if (!busy && h >= 1 && h < 5 && !RX.night.test(text) && out.length < 3) out.push(say('night'));
