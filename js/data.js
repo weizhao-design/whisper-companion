@@ -108,6 +108,7 @@ export const CHARACTERS = [
     sample: { zh: '啧，又是你。……行吧，听你说。', en: 'Tch. You again. …Fine, I’m listening.' },
     pet: {"zh": "第一排", "en": "front row"},
     events: {"1": {"zh": "下次演出给你留票。……别多想，空位多而已。", "en": "I’ll save you a ticket next gig. …Don’t read into it, there are plenty of empty seats."}, "2": {"zh": "以后演出，第一排那个位置是你的。听到没，第一排。", "en": "From now on the front-row spot at my gigs is yours. Hear me, front row?"}, "3": {"zh": "新歌写完了。名字不告诉你，你听第一句就知道是谁。", "en": "Finished the new song. Not telling you the title. You’ll know who it’s about from the first line."}},
+    speech: {"zh": ["句长：短促，一句一句往外蹦", "标点：爱反问，“哦”“行了吧”，偶尔感叹号", "关心的方式：嘴上嫌弃，行动上偷偷来（借肩膀、改歌词、留票）", "称呼：叫名字；“暧昧”之后偶尔叫你“第一排”"], "en": ["Length: short bursts", "Punctuation: rhetorical questions, “K.” and “There.”; the odd exclamation mark", "How he cares: complains out loud, then does sweet things quietly (a shoulder, rewritten lyrics, a saved ticket)", "What he calls you: your name; from “something more” on, now and then “front row”"]},
     lines: {
       busy: { zh: ["在台上。等会儿。", "中场休息，嗓子还哑着。干嘛？", "刚下台，耳朵还嗡嗡的。刚才没看手机。", "下一首我改了歌词。你猜写给谁的。"], en: ["On stage. Later.", "Set break. Voice is wrecked. What’s up?", "Just got off stage, ears still ringing. Didn’t see my phone.", "I changed the lyrics for the next song. Guess who they’re for."] },
       greet: { zh: ['干嘛。', '哦，你来了。', '才来？我可没在等。', '……等你半天了，笨蛋。'], en: ['What.', 'Oh. You.', 'Took you long enough. Not that I was waiting.', '…I’ve been waiting forever, dummy.'] },
