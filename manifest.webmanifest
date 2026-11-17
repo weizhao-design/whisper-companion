@@ -1,0 +1,16 @@
+{
+  "name": "悄悄话 Whisper",
+  "short_name": "悄悄话",
+  "description": "AI 陪伴玩具配套 App 演示 · Companion app demo for the AI Companion Toy",
+  "start_url": "./#/chats",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#17141A",
+  "theme_color": "#17141A",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

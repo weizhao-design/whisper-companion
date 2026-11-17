@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="day">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+<title>悄悄话 Whisper</title>
+<meta name="description" content="AI 陪伴玩具配套 App 演示 · Companion app demo for the AI Companion Toy">
+<meta name="theme-color" content="#17141A" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#FFF4F6" media="(prefers-color-scheme: light)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="悄悄话">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="css/app.css?v=19">
+<script>
+  // Apply the saved theme before first paint to avoid a flash.
+  try {
+    var s = JSON.parse(localStorage.getItem('whisper.v1') || 'null');
+    var th = s && s.settings && s.settings.theme || 'system';
+    if (th === 'system') th = matchMedia('(prefers-color-scheme: dark)').matches ? 'night' : 'day';
+    document.documentElement.dataset.theme = th;
+  } catch (e) {}
+</script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <mask id="m-chars-back" maskUnits="userSpaceOnUse" x="0" y="0" width="24" height="24">
+      <rect width="24" height="24" fill="#fff"/>
+      <circle cx="9" cy="7.25" r="3.25" fill="#000" stroke="#000" stroke-width="6"/>
+      <path d="M3 20.5a6 6 0 0 1 12 0z" fill="#000" stroke="#000" stroke-width="6" stroke-linejoin="round"/>
+    </mask>
+    <clipPath id="c-me"><circle cx="12" cy="12" r="8"/></clipPath>
+  </defs>
+  <symbol id="n-chat" viewBox="0 0 24 24">
+    <path d="M6 4h12a3 3 0 0 1 3 3v7a3 3 0 0 1-3 3h-6.5L7 21v-4H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2;stroke-linejoin:round"/>
+    <circle cx="8" cy="10.5" r="1.25" style="fill:var(--ic-detail)"/><circle cx="12" cy="10.5" r="1.25" style="fill:var(--ic-detail)"/><circle cx="16" cy="10.5" r="1.25" style="fill:var(--ic-detail)"/>
+  </symbol>
+  <symbol id="n-chars" viewBox="0 0 24 24">
+    <g mask="url(#m-chars-back)"><circle cx="15" cy="7.25" r="3.25" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2"/><path d="M9 20.5a6 6 0 0 1 12 0z" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2;stroke-linejoin:round"/></g>
+    <circle cx="9" cy="7.25" r="3.25" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2"/><path d="M3 20.5a6 6 0 0 1 12 0z" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2;stroke-linejoin:round"/>
+  </symbol>
+  <symbol id="n-toy" viewBox="0 0 24 24">
+    <path d="M12 20L4.481 12.552A5 5 0 1 1 12 6a5 5 0 1 1 7.519 6.552z" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2;stroke-linejoin:round"/>
+  </symbol>
+  <symbol id="n-me" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9" style="fill:var(--ic-fill);stroke:currentColor;stroke-width:2"/>
+    <circle cx="12" cy="9.75" r="2.75" style="fill:none;stroke:var(--ic-detail);stroke-width:2"/>
+    <path d="M7 21.5V19a2.5 2.5 0 0 1 2.5-2.5h5A2.5 2.5 0 0 1 17 19v2.5" clip-path="url(#c-me)" style="fill:none;stroke:var(--ic-detail);stroke-width:2;stroke-linecap:round"/>
+  </symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="i-more" viewBox="0 0 24 24"><g fill="currentColor"><circle cx="5.5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="18.5" cy="12" r="1.8"/></g></symbol>
+  <symbol id="i-mic" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><rect x="9.5" y="6" width="5" height="8.5" rx="2.5"/><path d="M7.5 12.5a4.5 4.5 0 0 0 9 0M12 17v1.5"/></g></symbol>
+  <symbol id="i-kbd" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M7.5 9.5h.01M10.5 9.5h.01M13.5 9.5h.01M16.5 9.5h.01M7.5 12.5h.01M10.5 12.5h.01M13.5 12.5h.01M16.5 12.5h.01M9 15.5h6"/></g></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7.5v9M7.5 12h9"/></g></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4 4"/></g></symbol>
+</svg>
+<div id="device">
+  <span class="sbtn l" style="top:165px;height:32px"></span><span class="sbtn l" style="top:232px;height:62px"></span><span class="sbtn l" style="top:308px;height:62px"></span><span class="sbtn r" style="top:262px;height:98px"></span>
+  <div id="screen">
+    <div id="statusbar" aria-hidden="true">
+      <span id="sb-time">9:41</span>
+      <span class="r">
+        <svg width="18" height="12" viewBox="0 0 18 12"><rect x="0" y="8" width="3.2" height="4" rx="1"/><rect x="4.7" y="5.5" width="3.2" height="6.5" rx="1"/><rect x="9.4" y="3" width="3.2" height="9" rx="1"/><rect x="14.1" y="0" width="3.2" height="12" rx="1"/></svg>
+        <svg width="16" height="12" viewBox="0 0 16 11.5"><path d="M8 2.2c2.4 0 4.6.9 6.3 2.4l1.1-1.2C13.4 1.5 10.8.5 8 .5S2.6 1.5.6 3.4l1.1 1.2C3.4 3.1 5.6 2.2 8 2.2z"/><path d="M8 5.6c1.5 0 2.8.5 3.9 1.4l1.1-1.2C11.6 4.6 9.9 3.9 8 3.9S4.4 4.6 3 5.8l1.1 1.2C5.2 6.1 6.5 5.6 8 5.6z"/><path d="M8 9.6l2.4-2.6c-.7-.5-1.5-.8-2.4-.8s-1.7.3-2.4.8z"/></svg>
+        <svg width="27" height="13" viewBox="0 0 27 13"><rect x=".5" y=".5" width="23" height="12" rx="3.6" fill="none" stroke="currentColor" opacity=".4"/><rect x="24.6" y="4.2" width="1.8" height="4.6" rx=".9" opacity=".4"/><rect id="sb-batt" x="2" y="2" width="16" height="9" rx="2"/></svg>
+      </span>
+    </div>
+    <div class="island"></div>
+    <div id="app"></div>
+    <div class="home-ind"></div>
+  </div>
+</div>
+<input type="file" id="f-album" accept="image/*" hidden>
+<input type="file" id="f-camera" accept="image/*" capture="environment" hidden>
+<input type="file" id="f-avatar" accept="image/*" hidden>
+<input type="file" id="f-avatar-cam" accept="image/*" capture="user" hidden>
+<script src="js/device.js?v=19"></script>
+<script type="module" src="js/app.js?v=19"></script>
+</body>
+</html>

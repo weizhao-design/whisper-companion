@@ -1,0 +1,128 @@
+// UI strings. Every visible string lives here so the whole app can switch language.
+const DICT = {
+  zh: {
+    appName: '悄悄话',
+    tabChats: '消息', tabChars: '角色', tabToy: '玩具', tabMe: '我',
+    search: '搜索角色、聊天记录', cancel: '取消', back: '返回', save: '保存', done: '完成', close: '关闭',
+    noChats: '还没有聊天。去"角色"里认识一个人吧。',
+    today: '今天', yesterday: '昨天',
+    typing: '正在输入…', speaking: '正在说话…', online: '在线',
+    inputPh: '说点什么…', holdTalk: '按住 说话', releaseSend: '松开 发送', releaseCancel: '松开 取消', releaseText: '松开 转文字',
+    recording: '正在录音', recHint: '松开发送 · 上滑取消 · 右滑转文字', tooShort: '说话时间太短',
+    album: '相册', camera: '拍照', care: '照顾', gift: '礼物',
+    voiceToText: '转文字', hideText: '收起', voiceOnly: '语音消息', noStt: '（这台设备不支持语音转文字）',
+    you: '我', photo: '[图片]', voiceTag: '[语音]', giftTag: '[礼物]',
+    youChangedAvatar: '你更换了头像', yourNewPhoto: '你的新头像',
+    chatInfo: '聊天详情', findChat: '查找聊天记录', relation: '我们的关系', memories: '共同记忆', noMemories: '他还没有记住什么。多聊聊吧。', memHint: '记错了直接改；删掉以后，他不会再提起。', hcTitle: 'OC / 私设', hcHint: '你补充的设定，和官方剧情分开保存。他回复时会参考，不会改写原本的故事。', hcPh: '例如：我们是大学同学', hcAdd: '添加', profileShared: '玩家资料', profileHint: '称呼、生日、喜好和边界，所有角色共用。',
+    callMe: '他怎么称呼我', replyMode: '回复形式', modeVoiceText: '语音 + 文字', modeText: '只发文字', modeVoice: '只发语音',
+    clearChat: '清空聊天记录', resetRel: '重置关系', confirmClear: '确定清空和他的全部聊天记录吗？', confirmReset: '确定把关系重置回"初识"吗？',
+    mood: '心情', sync: '默契', closeness: '亲密', daysKnown: '相识第 {n} 天',
+    stage0: '初识', stage1: '熟悉', stage2: '暧昧', stage3: '心意相通', nextStage: '距离"{s}"还差 {n}%',
+    moodHappy: '开心', moodCalm: '平静', moodMiss: '想你',
+    myChars: '我的角色', discover: '发现', nowDoing: '他现在：{s}', onToy: '在玩具上', add: '添加', added: '已添加', listen: '试听', listenHim: '听他说话',
+    sendMsg: '发消息', putOnToy: '放到玩具上', moments: '重要时刻', viewAllMem: '查看全部记忆', hisLooks: '他的样子', looksSub: '玩具上的表情',
+    looksIdle: '待机', looksListen: '聆听', looksThink: '思考', looksSpeak: '说话', about: '关于他', birthday: '生日', likes: '喜欢', catchphrase: '口头禅', meAtHim: '我在他这里',
+    allTags: '全部',
+    toyTitle: '玩具', toyHeroTitle: '让他来到你身边', toyHeroSub: '连接心形玩具后，他会出现在你的桌上，按住按钮就能和他说话。',
+    toyStep1: '给玩具通电，长按按钮', toyStep2: '在手机 Wi‑Fi 里连接玩具热点', toyStep3: '选择家里的 Wi‑Fi', toyStep4: '选择要放进玩具的角色',
+    startConnect: '开始连接（演示）', connecting: '正在连接…', noToy: '这是演示：没有实体玩具也能体验全部流程。',
+    online2: '在线', homeWifi: '家里的 Wi‑Fi', synced: '刚刚同步', change: '更换', sayHi: '打个招呼', mute: '静音', unmute: '取消静音',
+    sound: '声音', playWhere: '他的语音在哪里播放', playBoth: '都播放', playToy: '只在玩具', playPhone: '只在手机', volume: '玩具音量', quiet: '夜间静音',
+    screen: '屏幕', idleFace: '待机表情', faceSmile: '笑眨眼', faceSoft: '温柔笑 + 发丝', faceBrow: '挑眉审视', dimNight: '夜间自动调暗', brightness: '亮度',
+    device: '设备', deviceName: '设备名称', firmware: '固件版本', restart: '重启玩具', unbind: '解除绑定', confirmUnbind: '确定解除和玩具的绑定吗？',
+    pickChar: '选择放进玩具的角色', stIdle: '待机中', stListen: '聆听中…', stThink: '思考中…', stSpeak: '说话中…',
+    meTitle: '我', tapAvatar: '点头像更换照片', changeAvatar: '更换头像', pickPreset: '选一个喜欢的形象，或者用自己的照片', fromAlbum: '从相册选择', takePhoto: '拍照', letSee: '让角色看到我的头像', profile: '名字、生日与边界',
+    language: 'Language / 语言', appearance: '外观', followSys: '跟随系统', day: '日间', night: '夜间',
+    notifications: '通知', voice: '语音', privacy: '隐私与数据', aiConn: 'AI 连接', aboutApp: '关于',
+    appLang: '界面语言', replyLang: '他回复我时用的语言', followMsg: '跟随我的消息', alwaysZh: '总是中文', alwaysEn: '总是英文',
+    langNote: '切换后菜单、角色资料、声音和通知都会跟着变。已有的聊天保持原来的语言。',
+    nickname: '我的名字', bday: '我的生日', myLikes: '我喜欢', boundaries: '边界（他不会碰的话题）', boundariesPh: '例如：不聊身材、不聊前任',
+    autoplay: '自动播放他的语音', voiceTest: '试听系统声音',
+    aiMode: '回复模式', aiDemo: '演示模式（内置台词，离线可用）', aiClaude: '真实 AI（Claude）',
+    apiKey: 'Anthropic API Key', apiKeyNote: 'Key 只保存在这台设备的浏览器里，不会上传到任何别的地方。用它产生的费用由你的账号承担。',
+    clearData: '清除本机所有数据', confirmClearData: '这会删除所有聊天、头像和设置，确定吗？',
+    seeAvatarAsk: '要让他们看到你的新头像吗？', seeAvatarSub: '他们可能会聊起它。真人照片只会聊氛围和场景，不会评价长相。随时可以在设置里关闭。',
+    yes: '好呀', no: '不用了',
+    aboutText: '悄悄话是 AI 陪伴玩具项目的配套 App 演示。课程项目（SCAD IXDS 732）结束后由 Wei Zhao 个人继续设计与开发。所有角色均为原创。',
+    fanLabel: '非官方同人',
+    welcome: '欢迎', welcomeSub: '先选一种语言，之后可以随时在"我"里修改。', whatName: '他该怎么称呼你？', namePh: '你的名字', start: '开始',
+    ageGate: '我已年满 18 岁，并理解这是一个和虚拟角色恋爱聊天的 App。',
+    errApi: '连接 AI 失败：{e}。已改用演示回复。', refused: '（他好像不想聊这个。换个话题吧。）',
+    stageUp: '你们的关系变成了"{s}"', mFirstVoice: '第一次发语音', mFirstGift: '第一次送他礼物', mFirstPhoto: '第一次给他看照片', mStage: '关系升级为"{s}"', mMet: '认识了',
+    giftSent: '送出了 {g}', careSent: '{g}', results: '搜索结果', chars: '角色', records: '聊天记录', noResults: '没有找到',
+    copied: '已复制', fromToy: '来自玩具', micDenied: '没有麦克风权限，请在浏览器设置里允许。', install: '添加到主屏幕后像 App 一样全屏使用',
+    speakerOn: '播放', translate: '翻译',
+  },
+  en: {
+    appName: 'Whisper',
+    tabChats: 'Chats', tabChars: 'Characters', tabToy: 'Toy', tabMe: 'Me',
+    search: 'Search characters and chats', cancel: 'Cancel', back: 'Back', save: 'Save', done: 'Done', close: 'Close',
+    noChats: 'No chats yet. Meet someone in Characters.',
+    today: 'Today', yesterday: 'Yesterday',
+    typing: 'typing…', speaking: 'speaking…', online: 'online',
+    inputPh: 'Say something…', holdTalk: 'Hold to talk', releaseSend: 'Release to send', releaseCancel: 'Release to cancel', releaseText: 'Release for text',
+    recording: 'Recording', recHint: 'Release to send · slide up to cancel · slide right for text', tooShort: 'Too short',
+    album: 'Photos', camera: 'Camera', care: 'Care', gift: 'Gift',
+    voiceToText: 'Show text', hideText: 'Hide', voiceOnly: 'Voice message', noStt: '(Speech-to-text isn’t available on this device)',
+    you: 'Me', photo: '[Photo]', voiceTag: '[Voice]', giftTag: '[Gift]',
+    youChangedAvatar: 'You changed your profile photo', yourNewPhoto: 'your new photo',
+    chatInfo: 'Chat info', findChat: 'Search chat history', relation: 'Us', memories: 'Shared memories', noMemories: 'He hasn’t remembered anything yet. Keep talking.', memHint: 'Fix anything he got wrong. Delete it and he won’t bring it up again.', hcTitle: 'OC / headcanon', hcHint: 'Your own additions to his story, kept apart from canon. He takes them into account without rewriting the original.', hcPh: 'e.g. We met at university', hcAdd: 'Add', profileShared: 'Player profile', profileHint: 'Name, birthday, likes and boundaries, shared by every character.',
+    callMe: 'What he calls me', replyMode: 'He replies with', modeVoiceText: 'Voice + text', modeText: 'Text only', modeVoice: 'Voice only',
+    clearChat: 'Clear chat history', resetRel: 'Reset relationship', confirmClear: 'Delete your whole chat with him?', confirmReset: 'Reset your relationship to “Strangers”?',
+    mood: 'Mood', sync: 'Sync', closeness: 'Closeness', daysKnown: 'Day {n} together',
+    stage0: 'Strangers', stage1: 'Friends', stage2: 'Something more', stage3: 'Mutual', nextStage: '{n}% left to “{s}”',
+    moodHappy: 'Happy', moodCalm: 'Calm', moodMiss: 'Misses you',
+    myChars: 'Mine', discover: 'Discover', nowDoing: 'Now: {s}', onToy: 'On your toy', add: 'Add', added: 'Added', listen: 'Listen', listenHim: 'Hear him',
+    sendMsg: 'Message', putOnToy: 'Put on toy', moments: 'Moments', viewAllMem: 'All memories', hisLooks: 'His faces', looksSub: 'on the toy',
+    looksIdle: 'Idle', looksListen: 'Listening', looksThink: 'Thinking', looksSpeak: 'Talking', about: 'About him', birthday: 'Birthday', likes: 'Likes', catchphrase: 'Says', meAtHim: 'Me, to him',
+    allTags: 'All',
+    toyTitle: 'Toy', toyHeroTitle: 'Bring him to your side', toyHeroSub: 'Connect the heart toy and he’ll sit on your desk. Hold the button to talk.',
+    toyStep1: 'Power the toy and hold its button', toyStep2: 'Join the toy’s Wi‑Fi on your phone', toyStep3: 'Pick your home Wi‑Fi', toyStep4: 'Choose who lives in the toy',
+    startConnect: 'Connect (demo)', connecting: 'Connecting…', noToy: 'Demo: you can try the whole flow without a real toy.',
+    online2: 'Online', homeWifi: 'Home Wi‑Fi', synced: 'synced just now', change: 'Change', sayHi: 'Say hi', mute: 'Mute', unmute: 'Unmute',
+    sound: 'Sound', playWhere: 'Play his voice on', playBoth: 'Both', playToy: 'Toy only', playPhone: 'Phone only', volume: 'Toy volume', quiet: 'Quiet hours',
+    screen: 'Screen', idleFace: 'Idle face', faceSmile: 'Smile & blink', faceSoft: 'Soft smile', faceBrow: 'Raised brow', dimNight: 'Dim at night', brightness: 'Brightness',
+    device: 'Device', deviceName: 'Name', firmware: 'Firmware', restart: 'Restart toy', unbind: 'Unpair toy', confirmUnbind: 'Unpair this toy?',
+    pickChar: 'Who lives in the toy?', stIdle: 'Idle', stListen: 'Listening…', stThink: 'Thinking…', stSpeak: 'Talking…',
+    meTitle: 'Me', tapAvatar: 'Tap to change your photo', changeAvatar: 'Change avatar', pickPreset: 'Pick a look you like, or use your own photo', fromAlbum: 'Choose from Photos', takePhoto: 'Take a photo', letSee: 'Let characters see my photo', profile: 'Name, birthday & boundaries',
+    language: 'Language / 语言', appearance: 'Appearance', followSys: 'Follow system', day: 'Day', night: 'Night',
+    notifications: 'Notifications', voice: 'Voice', privacy: 'Privacy & data', aiConn: 'AI connection', aboutApp: 'About',
+    appLang: 'App language', replyLang: 'He replies in', followMsg: 'Same as my message', alwaysZh: 'Always Chinese', alwaysEn: 'Always English',
+    langNote: 'Switches menus, character profiles, voices and notifications. Past messages stay as they are.',
+    nickname: 'My name', bday: 'My birthday', myLikes: 'I like', boundaries: 'Boundaries (topics he won’t touch)', boundariesPh: 'e.g. no comments on my body, no exes',
+    autoplay: 'Auto-play his voice', voiceTest: 'Test system voice',
+    aiMode: 'Reply engine', aiDemo: 'Demo (built-in lines, works offline)', aiClaude: 'Real AI (Claude)',
+    apiKey: 'Anthropic API key', apiKeyNote: 'Your key stays in this browser on this device only. Usage is billed to your account.',
+    clearData: 'Clear all data on this device', confirmClearData: 'This deletes every chat, photo and setting. Continue?',
+    seeAvatarAsk: 'Let them see your new photo?', seeAvatarSub: 'They might mention it. With real-person photos they only talk about mood and scene, never looks. You can turn this off anytime.',
+    yes: 'Sure', no: 'No thanks',
+    aboutText: 'Whisper is the companion app demo for the AI Companion Toy project. After the course (SCAD IXDS 732) ended, Wei Zhao continued designing and building it independently. All characters are original.',
+    fanLabel: 'Unofficial fan character',
+    welcome: 'Welcome', welcomeSub: 'Pick a language. You can change it anytime in Me.', whatName: 'What should he call you?', namePh: 'Your name', start: 'Start',
+    ageGate: 'I’m 18 or older and understand this app is for romantic chats with virtual characters.',
+    errApi: 'Couldn’t reach the AI: {e}. Using demo replies instead.', refused: '(He’d rather not talk about that. Try something else.)',
+    stageUp: 'You’re now “{s}”', mFirstVoice: 'First voice message', mFirstGift: 'First gift', mFirstPhoto: 'First photo shared', mStage: 'Became “{s}”', mMet: 'Met',
+    giftSent: 'Gave {g}', careSent: '{g}', results: 'Results', chars: 'Characters', records: 'Messages', noResults: 'Nothing found',
+    copied: 'Copied', fromToy: 'from toy', micDenied: 'No microphone access. Allow it in your browser settings.', install: 'Add to Home Screen to use it full-screen like an app',
+    speakerOn: 'Play', translate: 'Translate',
+  },
+};
+
+let lang = 'zh';
+export function setLang(l) { lang = l === 'en' ? 'en' : 'zh'; document.documentElement.lang = lang === 'zh' ? 'zh-CN' : 'en'; }
+export function getLang() { return lang; }
+export function t(key, vars) {
+  let s = (DICT[lang] && DICT[lang][key]) ?? DICT.zh[key] ?? key;
+  if (vars) for (const [k, v] of Object.entries(vars)) s = s.replaceAll(`{${k}}`, v);
+  return s;
+}
+/** Pick the current language from a {zh, en} object (or return a plain string). */
+export function L(obj) { if (obj == null) return ''; if (typeof obj === 'string') return obj; return obj[lang] ?? obj.zh ?? obj.en ?? ''; }
+/** True if text is mainly Chinese. */
+export function isZh(text) {
+  const s = String(text || '');
+  const cjk = (s.match(/[㐀-鿿]/g) || []).length;
+  const latin = (s.match(/[A-Za-z]/g) || []).length;
+  if (!cjk && !latin) return null;
+  return cjk * 2 >= latin;
+}
