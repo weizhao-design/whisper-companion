@@ -19,6 +19,13 @@ const RX = {
 const NAME_RX = /(?:我叫|叫我)([一-鿿A-Za-z]{1,8})|(?:my name is|call me|i'm called)\s+([A-Za-z][A-Za-z\- ]{0,15})/i;
 const LIKE_RX = /我(?:很|最|超|也)?喜欢(?!你)([^，。！？,.!?\s]{1,12})|\bi (?:really |also )?(?:like|love|enjoy) (?!you\b)([a-z][a-z \-]{1,24})/i;
 
+/** Topics from the player's boundaries text ("不聊身材、不聊前任" -> 身材, 前任). */
+export function boundaryWords(text) {
+  return String(text || '')
+    .replace(/不要聊|不想聊|别聊|不聊|不要提|别提|不要|no comments on( my)?|don['’]t talk about|don['’]t mention|no talk(ing)? about|\bno\b/gi, ' ')
+    .split(/[，,、；;。.\s\/|]+/).map(w => w.trim()).filter(w => w.length >= 2);
+}
+
 export function replyLangFor(text, settings) {
   if (settings.replyLang === 'zh') return 'zh';
   if (settings.replyLang === 'en') return 'en';
@@ -67,6 +74,9 @@ export function demoReply({ char, cs, state, msg }) {
   else if (msg.type === 'gift') { out.push(say('gift')); affinity = 6; }
   else if (msg.type === 'care') { out.push(say('care')); affinity = 4; }
   else if (msg.type === 'voice' && !text) { out.push(say('voice')); affinity = 4; }
+  else if (lines.boundary && boundaryWords(state.profile.boundaries).some(w => text.toLowerCase().includes(w.toLowerCase()))) {
+    out.push(say('boundary')); affinity = 1;
+  }
   else {
     const nm = text.match(NAME_RX);
     if (nm) {
@@ -102,3 +112,22 @@ export function demoReply({ char, cs, state, msg }) {
 }
 
 function capitalize(s) { return s ? s[0].toUpperCase() + s.slice(1) : s; }
+
+/**
+ * A message he sends first, or null. Never between 1 and 7 am.
+ * Right after a busy slot: "meeting's over"; in the morning: good morning; otherwise his own opener.
+ */
+export function proactiveLine({ char, cs, state, date = new Date() }) {
+  const h = date.getHours();
+  if (h >= 1 && h < 7) return null;
+  const lang = state.settings.lang === 'en' ? 'en' : 'zh';
+  const stage = stageOf(cs.affinity);
+  const L = char.lines;
+  const ctx = { me: cs.callMe || state.profile.name || (lang === 'zh' ? '你' : 'you'), like: '', gift: '', now: lang === 'zh' ? nowDoing(char, date).zh : capitalize(nowDoing(char, date).en) };
+  const justFree = char.schedule.some(([a, b, , busy]) => busy && h >= b && h < b + 2);
+  let text;
+  if (justFree && L.busy) text = L.busy[lang][2];
+  else if (h >= 7 && h < 10 && L.morning) text = pick(L.morning[lang], stage);
+  else if (L.ping) text = pick(L.ping[lang], stage);
+  return text ? { text: fill(text, ctx), lang } : null;
+}

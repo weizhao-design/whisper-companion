@@ -2,7 +2,7 @@ import { t, L, setLang, getLang } from './i18n.js?v=21';
 import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=21';
 import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=21';
 import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=21';
-import { demoReply, replyLangFor } from './demo-ai.js?v=21';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=21';
 import { claudeReply } from './claude.js?v=21';
 import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=21';
 
@@ -528,6 +528,7 @@ const routeId = () => route().parts[1];
 ACT.delMem = el => update(s => { const cs = s.chars[routeId()]; cs.memories = cs.memories.filter(m => m.id !== el.dataset.id); });
 ACT.addHc = () => { const inp = $('#hcnew'); const v = inp && inp.value.trim(); if (!v) return; update(s => { const cs = s.chars[routeId()]; (cs.headcanon ||= []).push({ id: newId(), text: v, ts: Date.now() }); }); };
 ACT.delHc = el => update(s => { const cs = s.chars[routeId()]; cs.headcanon = (cs.headcanon || []).filter(h => h.id !== el.dataset.id); });
+ACT.toggleProactive = () => update(s => { s.settings.proactive = s.settings.proactive === false; });
 ACT.replyMode = el => update(s => { s.chars[routeId()].replyMode = el.dataset.v; });
 ACT.pinChat = () => update(s => { const cs = s.chars[routeId()]; cs.pinned = !cs.pinned; });
 ACT.clearChat = async () => { if (await confirmSheet(t('confirmClear'))) update(s => { s.messages[routeId()] = []; }); };
@@ -786,6 +787,8 @@ function screenMeSub(which) {
     <label class="cell col">${t('boundaries')}<textarea data-pf="boundaries" placeholder="${t('boundariesPh')}">${esc(s.profile.boundaries)}</textarea></label></div></div>`;
   if (which === 'privacy') return `${header(t('privacy'), { back: true })}<div class="body">
     <div class="group">${ownedChars().map(c => `<button class="cell" data-go="#/chat/${c.id}/info">${t('memories')} · ${esc(L(c.name))}<span class="v">${s.chars[c.id].memories.length} ›</span></button>`).join('')}</div>
+    <div class="group"><button class="cell" data-act="toggleProactive">${t('proactive')}<span class="tg ${s.settings.proactive === false ? '' : 'on'}"></span></button></div>
+    <p class="note" style="padding:0 18px">${t('proactiveNote')}</p>
     <div class="group"><button class="cell danger" data-act="clearAll">${t('clearData')}</button></div></div>`;
   if (which === 'about') return `${header(t('aboutApp'), { back: true })}<div class="body"><div class="onb"><div class="big">${appIconSvg()}</div><h2>${t('appName')}</h2><p style="text-align:left">${t('aboutText')}</p><p style="font-size:12px">v0.1 · demo</p></div></div>`;
   return screenMe();
@@ -887,8 +890,28 @@ window.addEventListener('message', e => {
   if ((e.data.type === 'wz-prefs' || e.data.type === 'wh-lang') && applyHostPrefs(e.data)) render();
 });
 
+// ---------- he messages first ----------
+// The character on the toy writes first if you haven't talked for 3 hours: at most twice a day,
+// never between 1 and 7 am, and it can be switched off in Me > Privacy.
+function maybeProactive() {
+  const s = S(); if (!s.onboarded || s.settings.proactive === false) return;
+  const id = s.toy.charId; const c = getChar(id); const cs = s.chars[id]; if (!c || !cs || !cs.owned) return;
+  const list = s.messages[id] || []; const last = list.length ? list[list.length - 1].ts : 0;
+  if (Date.now() - last < 3 * 3600e3) return;
+  const day = new Date().toDateString(); const n = cs.proactive && cs.proactive.day === day ? cs.proactive.n : 0;
+  if (n >= 2) return;
+  const line = proactiveLine({ char: c, cs, state: s }); if (!line) return;
+  update(st => {
+    st.messages[id].push({ id: newId(), from: 'him', type: 'text', text: line.text, lang: line.lang, proactive: true, ts: Date.now() });
+    if (currentChat() !== id) st.chars[id].unread++;
+    st.chars[id].proactive = { day, n: n + 1 };
+  });
+}
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(maybeProactive, 1500); });
+
 // ---------- boot ----------
 if (!location.hash) history.replaceState(null, '', '#/chats');
 render(true);
+setTimeout(maybeProactive, 2500);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 window.addEventListener('beforeunload', save);
