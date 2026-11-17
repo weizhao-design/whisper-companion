@@ -58,18 +58,18 @@
   <div class="acts"><button id="copy">复制</button><a href="./" id="t-back" style="align-self:center;font-size:13px">返回 App</a></div>
 </div>
 <script type="module">
-import { CHARACTERS } from './js/data.js?v=20';
-import { portrait } from './js/avatar.js?v=20';
-import { allVoices, pickVoice, voiceParams, voiceOverrides, saveVoiceOverrides, speak, ttsSupported } from './js/voice.js?v=20';
+import { CHARACTERS } from './js/data.js?v=21';
+import { portrait } from './js/avatar.js?v=21';
+import { allVoices, pickVoice, voiceParams, voiceOverrides, saveVoiceOverrides, speak, ttsSupported, isOnline } from './js/voice.js?v=21';
 
 let lang = 'zh';
 const T = {
-  zh: { title: '角色声音试听', lead: '给每个角色选一个系统声音，调音高和语速，点台词试听。保存后，这台电脑上的 App 就会用你选的声音。', voice: '声音', pitch: '音高', rate: '语速', auto: '自动', save: '保存到这台设备', reset: '恢复默认', saved: '已保存', export: '把选择发给我', export2: '选好后，复制下面这段发回来，我就能把它设成所有设备的默认值。', copy: '复制', copied: '已复制', back: '返回 App',
+  zh: { title: '角色声音试听', lead: '给每个角色选一个系统声音，调音高和语速，点台词试听。保存后，这台电脑上的 App 就会用你选的声音。', voice: '声音', pitch: '音高', rate: '语速', auto: '自动', online: '  · 在线（需要联网，可能用不了）', save: '保存到这台设备', reset: '恢复默认', saved: '已保存', export: '把选择发给我', export2: '选好后，复制下面这段发回来，我就能把它设成所有设备的默认值。', copy: '复制', copied: '已复制', back: '返回 App',
         count: n => `这台设备有 ${n} 个中文声音`, noTts: '这个浏览器不支持语音合成。',
-        tip: '声音来自你的系统和浏览器，不同设备不一样。Windows 或 Mac 上用 Edge 浏览器打开，会多出 Yunxi、Yunyang、Yunjian 等更自然的中文男声。面试演示前，在演示用的那台电脑上选好并保存。' },
-  en: { title: 'Character voices', lead: 'Pick a system voice for each character, set pitch and speed, and tap a line to hear it. Saved choices are used by the app on this device.', voice: 'Voice', pitch: 'Pitch', rate: 'Speed', auto: 'Auto', save: 'Save on this device', reset: 'Reset', saved: 'Saved', export: 'Send me your picks', export2: 'When you are happy, copy this and send it back so I can make it the default everywhere.', copy: 'Copy', copied: 'Copied', back: 'Back to the app',
+        tip: '声音来自你的系统和浏览器，不同设备不一样。“自动”只用这台设备上装好的声音，不会突然变成女声。标着“在线”的声音要连微软的服务；如果选了以后听起来是女声，说明这台设备连不上，请换回本地声音。面试演示前，在演示用的那台电脑上选好并保存。' },
+  en: { title: 'Character voices', lead: 'Pick a system voice for each character, set pitch and speed, and tap a line to hear it. Saved choices are used by the app on this device.', voice: 'Voice', pitch: 'Pitch', rate: 'Speed', auto: 'Auto', online: '  · online (needs the network, may not work)', save: 'Save on this device', reset: 'Reset', saved: 'Saved', export: 'Send me your picks', export2: 'When you are happy, copy this and send it back so I can make it the default everywhere.', copy: 'Copy', copied: 'Copied', back: 'Back to the app',
         count: n => `${n} English voices on this device`, noTts: 'This browser has no speech synthesis.',
-        tip: 'Voices come from your system and browser, so every device differs. Microsoft Edge on Windows or Mac adds much more natural voices (Andrew, Brian, Christopher…). Before an interview, pick and save on the computer you will demo on.' },
+        tip: 'Voices come from your system and browser, so every device differs. “Auto” only uses voices installed on this device, so he never turns into a female voice. Voices marked “online” need Microsoft’s service; if one sounds female after you pick it, this device cannot reach it, so switch back to a local voice. Before an interview, pick and save on the computer you will demo on.' },
 };
 const t = k => T[lang][k];
 const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -94,7 +94,7 @@ function render() {
     const p = voiceParams(lang, { ...c.voice, id: c.id });
     const autoV = pickVoice(lang, { ...c.voice });
     const opts = [`<option value="">${t('auto')}（${esc(autoV ? autoV.name : '—')}）</option>`]
-      .concat(voices.map(v => `<option value="${esc(v.name)}" ${o[lang] === v.name ? 'selected' : ''}>${esc(v.name)}</option>`)).join('');
+      .concat(voices.map(v => `<option value="${esc(v.name)}" ${o[lang] === v.name ? 'selected' : ''}>${esc(v.name)}${isOnline(v) ? t('online') : ''}</option>`)).join('');
     return `<section class="card" data-id="${c.id}">
       <div class="head"><div class="av">${portrait(c.look)}</div><div><b>${esc(c.name[lang])}</b><small>${esc(c.role[lang])} · ${esc(c.tagline[lang])}</small></div></div>
       <div class="grid">

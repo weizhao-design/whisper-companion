@@ -71,6 +71,7 @@ let voicesCache = [];
 function loadVoices() { voicesCache = window.speechSynthesis?.getVoices() || []; }
 if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.addEventListener?.('voiceschanged', loadVoices); }
 export function allVoices() { loadVoices(); return voicesCache; }
+export const isOnline = v => !!v && v.localService === false;
 
 const MALE_HINTS = /(male|yunxi|yunjian|yunyang|yunjhe|kangkang|li-mu|daniel|alex|fred|aaron|arthur|tom|rishi|guy|davis|eric|liam|ryan|nathan|david|mark|andrew|brian|christopher|roger|steffan)/i;
 const langOk = (v, lang) => (lang === 'en' ? /^en/i : /^(zh|cmn)/i).test(v.lang);
@@ -86,13 +87,17 @@ export function pickVoice(lang, opts = {}) {
   const list = voicesCache.filter(v => langOk(v, lang));
   const ovr = opts.id && voiceOverrides()[opts.id];
   if (ovr && ovr[lang]) { const v = list.find(x => x.name === ovr[lang]); if (v) return v; }
+  // Automatic choice uses voices installed on the device only. Online voices (Edge's "Online
+  // (Natural)") need Microsoft's service; where that is blocked, Edge silently swaps in its
+  // default female voice. They are used only when picked by hand on voices.html.
+  const local = list.filter(v => v.localService !== false);
   for (const want of (opts[lang] || [])) {
     const w = want.toLowerCase();
-    // prefer the natural (neural) variant of a voice when the browser offers both
-    const hit = list.filter(v => v.name.toLowerCase().includes(w)).sort((x, y) => /natural|online/i.test(y.name) - /natural|online/i.test(x.name))[0];
+    const hit = local.find(v => v.name.toLowerCase().includes(w));
     if (hit) return hit;
   }
-  return list.find(v => MALE_HINTS.test(v.name)) || list.find(v => /CN|TW|US|GB/i.test(v.lang)) || list[0] || null;
+  return local.find(v => MALE_HINTS.test(v.name)) || local.find(v => /CN|TW|US|GB/i.test(v.lang)) || local[0]
+    || list.find(v => MALE_HINTS.test(v.name)) || list[0] || null;
 }
 /** pitch/rate after the device override; a female fallback voice gets pitched down so he still sounds male. */
 export function voiceParams(lang, opts = {}, v = pickVoice(lang, opts)) {
