@@ -69,13 +69,38 @@ export class Recorder {
 
 let voicesCache = [];
 function loadVoices() { voicesCache = window.speechSynthesis?.getVoices() || []; }
-if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; }
+if ('speechSynthesis' in window) { loadVoices(); speechSynthesis.addEventListener?.('voiceschanged', loadVoices); }
+export function allVoices() { loadVoices(); return voicesCache; }
 
-const MALE_HINTS = /(male|yunxi|yunjian|yunyang|kangkang|daniel|alex|fred|aaron|arthur|tom|rishi|guy|davis|eric|liam|ryan|nathan)/i;
-function pickVoice(lang) {
-  const want = lang === 'en' ? /^en/i : /^zh|cmn/i;
-  const list = voicesCache.filter(v => want.test(v.lang));
+const MALE_HINTS = /(male|yunxi|yunjian|yunyang|yunjhe|kangkang|li-mu|daniel|alex|fred|aaron|arthur|tom|rishi|guy|davis|eric|liam|ryan|nathan|david|mark|andrew|brian|christopher|roger|steffan)/i;
+const langOk = (v, lang) => (lang === 'en' ? /^en/i : /^(zh|cmn)/i).test(v.lang);
+
+// Choices made on voices.html for this device: { [charId]: { zh, en, pitch, rate } }
+const OVR_KEY = 'whisper.voices';
+export function voiceOverrides() { try { return JSON.parse(localStorage.getItem(OVR_KEY) || '{}') || {}; } catch (e) { return {}; } }
+export function saveVoiceOverrides(o) { try { localStorage.setItem(OVR_KEY, JSON.stringify(o)); } catch (e) {} }
+
+/** The voice a character uses in a language: the device override, else his ranked list, else any male voice. */
+export function pickVoice(lang, opts = {}) {
+  loadVoices();
+  const list = voicesCache.filter(v => langOk(v, lang));
+  const ovr = opts.id && voiceOverrides()[opts.id];
+  if (ovr && ovr[lang]) { const v = list.find(x => x.name === ovr[lang]); if (v) return v; }
+  for (const want of (opts[lang] || [])) {
+    const w = want.toLowerCase();
+    // prefer the natural (neural) variant of a voice when the browser offers both
+    const hit = list.filter(v => v.name.toLowerCase().includes(w)).sort((x, y) => /natural|online/i.test(y.name) - /natural|online/i.test(x.name))[0];
+    if (hit) return hit;
+  }
   return list.find(v => MALE_HINTS.test(v.name)) || list.find(v => /CN|TW|US|GB/i.test(v.lang)) || list[0] || null;
+}
+/** pitch/rate after the device override; a female fallback voice gets pitched down so he still sounds male. */
+export function voiceParams(lang, opts = {}, v = pickVoice(lang, opts)) {
+  const ovr = (opts.id && voiceOverrides()[opts.id]) || {};
+  let pitch = ovr.pitch ?? opts.pitch ?? 0.9;
+  const rate = ovr.rate ?? opts.rate ?? 1;
+  if (ovr.pitch == null && v && !MALE_HINTS.test(v.name)) pitch = Math.max(0.4, pitch * 0.72);
+  return { voice: v, pitch, rate };
 }
 
 export const ttsSupported = 'speechSynthesis' in window;
@@ -84,9 +109,10 @@ export function speak(text, lang, voiceOpts = {}, onstart, onend) {
   speechSynthesis.cancel();
   const u = new SpeechSynthesisUtterance(text);
   u.lang = lang === 'en' ? 'en-US' : 'zh-CN';
-  const v = pickVoice(lang); if (v) u.voice = v;
-  u.pitch = voiceOpts.pitch ?? 0.85;
-  u.rate = voiceOpts.rate ?? 1;
+  const p = voiceParams(lang, voiceOpts);
+  if (p.voice) { u.voice = p.voice; u.lang = p.voice.lang; }
+  u.pitch = p.pitch;
+  u.rate = p.rate;
   u.onstart = () => onstart?.();
   u.onend = () => onend?.();
   u.onerror = () => onend?.();

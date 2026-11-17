@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="zh-Hans">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>角色声音试听 · 悄悄话</title>
+<style>
+  /* same tokens as the app: day pink / night plum */
+  :root { --bg: #FFF4F6; --card: #FFFFFF; --ink: #3A2530; --muted: #7F6370; --line: #F2D9E0; --soft: #FBE9EE; --acc: #C2416A; --on-acc: #FFFFFF; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #17141A; --card: #211D25; --ink: #EEE8F0; --muted: #A79EAB; --line: #3A3340; --soft: #2B2630; --acc: #E07A88; --on-acc: #17141A; color-scheme: dark; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 15px/1.55 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right)) 60px max(16px, env(safe-area-inset-left)); }
+  h1 { font-size: 24px; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 16px; font-size: 14px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 18px; }
+  .seg { display: inline-flex; background: var(--card); border: 1px solid var(--line); border-radius: 99px; padding: 3px; }
+  .seg button { border: 0; background: none; color: var(--ink); padding: 6px 14px; border-radius: 99px; font: inherit; font-size: 13px; cursor: pointer; }
+  .seg button.on { background: var(--acc); color: var(--on-acc); font-weight: 600; }
+  .info { font-size: 12.5px; color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 14px; }
+  .head { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
+  .av { width: 48px; height: 48px; border-radius: 13px; overflow: hidden; flex: 0 0 auto; }
+  .av svg, .av img { width: 100%; height: 100%; display: block; object-fit: cover; }
+  .head b { display: block; font-size: 16px; }
+  .head small { color: var(--muted); font-size: 12.5px; }
+  .grid { display: grid; grid-template-columns: 64px minmax(0, 1fr) 44px; gap: 10px 12px; align-items: center; font-size: 13.5px; }
+  .grid label { color: var(--muted); }
+  select { width: 100%; font: inherit; font-size: 13.5px; color: var(--ink); background: var(--soft); border: 1px solid var(--line); border-radius: 10px; padding: 7px 8px; }
+  input[type=range] { width: 100%; accent-color: var(--acc); }
+  .val { font-variant-numeric: tabular-nums; text-align: right; color: var(--muted); font-size: 12.5px; }
+  .lines { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  .lines button, .acts button { font: inherit; font-size: 13px; border: 1px solid var(--line); background: var(--soft); color: var(--ink); border-radius: 12px; padding: 7px 11px; cursor: pointer; text-align: left; }
+  .lines button:hover { border-color: var(--acc); }
+  .acts { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+  .acts .save { background: var(--acc); color: var(--on-acc); border-color: var(--acc); font-weight: 600; }
+  .saved { font-size: 12.5px; color: var(--acc); align-self: center; }
+  textarea { width: 100%; min-height: 110px; font: 12px/1.5 ui-monospace, Menlo, Consolas, monospace; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 10px; }
+  .note { font-size: 13px; color: var(--muted); background: var(--soft); border-radius: 12px; padding: 10px 12px; margin: 0 0 16px; }
+  a { color: var(--acc); }
+  :focus-visible { outline: 2px solid var(--acc); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 id="t-title">角色声音试听</h1>
+  <p class="lead" id="t-lead">给每个角色选一个系统声音，调音高和语速，点台词试听。保存后，这台电脑上的 App 就会用你选的声音。</p>
+  <p class="note" id="t-note"></p>
+  <div class="bar">
+    <div class="seg" role="group" aria-label="Language"><button data-lang="zh" class="on">中文</button><button data-lang="en">English</button></div>
+    <span class="info" id="vcount"></span>
+  </div>
+  <div id="list"></div>
+  <h3 id="t-export" style="font-size:15px;margin:22px 0 8px">把选择发给我</h3>
+  <p class="lead" id="t-export2" style="margin-bottom:8px">选好后，复制下面这段发回来，我就能把它设成所有设备的默认值。</p>
+  <textarea id="out" readonly></textarea>
+  <div class="acts"><button id="copy">复制</button><a href="./" id="t-back" style="align-self:center;font-size:13px">返回 App</a></div>
+</div>
+<script type="module">
+import { CHARACTERS } from './js/data.js?v=20';
+import { portrait } from './js/avatar.js?v=20';
+import { allVoices, pickVoice, voiceParams, voiceOverrides, saveVoiceOverrides, speak, ttsSupported } from './js/voice.js?v=20';
+
+let lang = 'zh';
+const T = {
+  zh: { title: '角色声音试听', lead: '给每个角色选一个系统声音，调音高和语速，点台词试听。保存后，这台电脑上的 App 就会用你选的声音。', voice: '声音', pitch: '音高', rate: '语速', auto: '自动', save: '保存到这台设备', reset: '恢复默认', saved: '已保存', export: '把选择发给我', export2: '选好后，复制下面这段发回来，我就能把它设成所有设备的默认值。', copy: '复制', copied: '已复制', back: '返回 App',
+        count: n => `这台设备有 ${n} 个中文声音`, noTts: '这个浏览器不支持语音合成。',
+        tip: '声音来自你的系统和浏览器，不同设备不一样。Windows 或 Mac 上用 Edge 浏览器打开，会多出 Yunxi、Yunyang、Yunjian 等更自然的中文男声。面试演示前，在演示用的那台电脑上选好并保存。' },
+  en: { title: 'Character voices', lead: 'Pick a system voice for each character, set pitch and speed, and tap a line to hear it. Saved choices are used by the app on this device.', voice: 'Voice', pitch: 'Pitch', rate: 'Speed', auto: 'Auto', save: 'Save on this device', reset: 'Reset', saved: 'Saved', export: 'Send me your picks', export2: 'When you are happy, copy this and send it back so I can make it the default everywhere.', copy: 'Copy', copied: 'Copied', back: 'Back to the app',
+        count: n => `${n} English voices on this device`, noTts: 'This browser has no speech synthesis.',
+        tip: 'Voices come from your system and browser, so every device differs. Microsoft Edge on Windows or Mac adds much more natural voices (Andrew, Brian, Christopher…). Before an interview, pick and save on the computer you will demo on.' },
+};
+const t = k => T[lang][k];
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const langOk = v => (lang === 'en' ? /^en/i : /^(zh|cmn)/i).test(v.lang);
+const fillLine = s => s.replaceAll('{me}', lang === 'zh' ? '你' : 'you').replaceAll('{now}', '').replaceAll('{like}', lang === 'zh' ? '草莓' : 'strawberries').replaceAll('{gift}', lang === 'zh' ? '围巾' : 'scarf');
+
+function lines(c) {
+  const L = c.lines;
+  return [c.sample[lang], L.night[lang][3], L.tired[lang][2], L.miss[lang][3]].filter(Boolean).map(fillLine);
+}
+
+function render() {
+  for (const k of ['title', 'lead', 'export', 'export2', 'back']) document.getElementById('t-' + k).textContent = t(k);
+  document.getElementById('t-note').textContent = ttsSupported ? t('tip') : t('noTts');
+  document.getElementById('copy').textContent = t('copy');
+  document.documentElement.lang = lang === 'zh' ? 'zh-Hans' : 'en';
+  const voices = allVoices().filter(langOk);
+  document.getElementById('vcount').textContent = t('count')(voices.length);
+  const ovr = voiceOverrides();
+  document.getElementById('list').innerHTML = CHARACTERS.map(c => {
+    const o = ovr[c.id] || {};
+    const p = voiceParams(lang, { ...c.voice, id: c.id });
+    const autoV = pickVoice(lang, { ...c.voice });
+    const opts = [`<option value="">${t('auto')}（${esc(autoV ? autoV.name : '—')}）</option>`]
+      .concat(voices.map(v => `<option value="${esc(v.name)}" ${o[lang] === v.name ? 'selected' : ''}>${esc(v.name)}</option>`)).join('');
+    return `<section class="card" data-id="${c.id}">
+      <div class="head"><div class="av">${portrait(c.look)}</div><div><b>${esc(c.name[lang])}</b><small>${esc(c.role[lang])} · ${esc(c.tagline[lang])}</small></div></div>
+      <div class="grid">
+        <label for="v-${c.id}">${t('voice')}</label><select id="v-${c.id}" data-k="voice">${opts}</select><span></span>
+        <label for="p-${c.id}">${t('pitch')}</label><input id="p-${c.id}" data-k="pitch" type="range" min="0.4" max="1.6" step="0.02" value="${p.pitch}"><span class="val">${(+p.pitch).toFixed(2)}</span>
+        <label for="r-${c.id}">${t('rate')}</label><input id="r-${c.id}" data-k="rate" type="range" min="0.6" max="1.4" step="0.02" value="${p.rate}"><span class="val">${(+p.rate).toFixed(2)}</span>
+      </div>
+      <div class="lines">${lines(c).map((l, i) => `<button data-say="${i}">▶ ${esc(l)}</button>`).join('')}</div>
+      <div class="acts"><button class="save" data-act="save">${t('save')}</button><button data-act="reset">${t('reset')}</button><span class="saved" hidden>${t('saved')}</span></div>
+    </section>`;
+  }).join('');
+  updateOut();
+}
+
+// what the card currently shows (not yet saved)
+function current(card) {
+  const id = card.dataset.id; const c = CHARACTERS.find(x => x.id === id);
+  const name = card.querySelector('[data-k=voice]').value;
+  return { c, name, pitch: +card.querySelector('[data-k=pitch]').value, rate: +card.querySelector('[data-k=rate]').value };
+}
+function updateOut() {
+  document.getElementById('out').value = JSON.stringify(voiceOverrides(), null, 2);
+}
+
+document.getElementById('list').addEventListener('input', e => {
+  const r = e.target.closest('input[type=range]'); if (r) r.nextElementSibling.textContent = (+r.value).toFixed(2);
+});
+document.getElementById('list').addEventListener('click', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const cur = current(card);
+  const say = e.target.closest('[data-say]');
+  if (say) {
+    // preview exactly what is on screen, without saving
+    const prev = voiceOverrides(); const tmp = { ...prev, [cur.c.id]: { ...(prev[cur.c.id] || {}), [lang]: cur.name || undefined, pitch: cur.pitch, rate: cur.rate } };
+    saveVoiceOverrides(tmp);
+    speak(lines(cur.c)[+say.dataset.say], lang, { ...cur.c.voice, id: cur.c.id }, null, () => {});
+    saveVoiceOverrides(prev);
+    return;
+  }
+  const act = e.target.closest('[data-act]'); if (!act) return;
+  const all = voiceOverrides();
+  if (act.dataset.act === 'save') {
+    const o = { ...(all[cur.c.id] || {}), pitch: cur.pitch, rate: cur.rate };
+    if (cur.name) o[lang] = cur.name; else delete o[lang];
+    all[cur.c.id] = o;
+  } else { delete all[cur.c.id]; }
+  saveVoiceOverrides(all);
+  if (act.dataset.act === 'reset') return render();
+  const s = card.querySelector('.saved'); s.hidden = false; setTimeout(() => { s.hidden = true; }, 1600);
+  updateOut();
+});
+document.querySelector('.seg').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  lang = b.dataset.lang; document.querySelectorAll('.seg button').forEach(x => x.classList.toggle('on', x === b)); render();
+});
+document.getElementById('copy').addEventListener('click', async () => {
+  const ta = document.getElementById('out'); const btn = document.getElementById('copy');
+  try { await navigator.clipboard.writeText(ta.value); } catch (e) { ta.select(); }
+  btn.textContent = t('copied'); setTimeout(() => { btn.textContent = t('copy'); }, 1500);
+});
+// voices load asynchronously in Chrome / Edge
+if (ttsSupported) speechSynthesis.addEventListener?.('voiceschanged', render);
+render();
+</script>
+</body>
+</html>

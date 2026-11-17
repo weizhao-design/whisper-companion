@@ -1,10 +1,10 @@
-import { t, L, setLang, getLang } from './i18n.js?v=19';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=19';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=19';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=19';
-import { demoReply, replyLangFor } from './demo-ai.js?v=19';
-import { claudeReply } from './claude.js?v=19';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=19';
+import { t, L, setLang, getLang } from './i18n.js?v=20';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=20';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=20';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=20';
+import { demoReply, replyLangFor } from './demo-ai.js?v=20';
+import { claudeReply } from './claude.js?v=20';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=20';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -480,7 +480,7 @@ async function playHim(id, msgs) {
   for (const m of msgs) {
     ui.speakingId = m.id; ui.speakingChar = id; setFace(id, 'speak');
     update(s => { const mm = s.messages[id].find(x => x.id === m.id); if (mm) mm.heard = true; });
-    await new Promise(res => speak(m.text, m.lang || getLang(), c.voice, null, res));
+    await new Promise(res => speak(m.text, m.lang || getLang(), { ...c.voice, id: c.id }, null, res));
     if (ui.speakingId !== m.id) return; // interrupted
   }
   ui.speakingId = null; setFace(id, 'idle'); onChange();
@@ -585,7 +585,7 @@ function discoverGrid() {
   }).join('')}</div>`;
 }
 ACT.dtag = el => { ui.discoverTag = el.dataset.v || null; render(); };
-ACT.listen = el => { const c = getChar(el.dataset.id); setFace(c.id, 'speak'); speak(c.sample[getLang()], getLang(), c.voice, null, () => setFace(c.id, 'idle')); };
+ACT.listen = el => { const c = getChar(el.dataset.id); setFace(c.id, 'speak'); speak(c.sample[getLang()], getLang(), { ...c.voice, id: c.id }, null, () => setFace(c.id, 'idle')); };
 ACT.addChar = el => {
   const id = el.dataset.id; const c = getChar(id); const lang = getLang();
   update(s => {
@@ -624,7 +624,7 @@ function screenCharProfile(id) {
 ACT.previewFace = el => {
   const id = el.dataset.id; const st = el.dataset.st;
   setFace(id, st);
-  if (st === 'speak') { const c = getChar(id); speak(c.sample[getLang()], getLang(), c.voice, null, () => setFace(id, 'idle')); }
+  if (st === 'speak') { const c = getChar(id); speak(c.sample[getLang()], getLang(), { ...c.voice, id: c.id }, null, () => setFace(id, 'idle')); }
   else setTimeout(() => { if (face[id] === st) setFace(id, 'idle'); }, 3500);
 };
 ACT.putOnToy = el => {
@@ -693,7 +693,7 @@ function pickToyChar(finishing) {
 ACT.pickToyChar = () => pickToyChar(false);
 ACT.toyHi = () => {
   const s = S(); const c = getChar(s.toy.charId); if (s.toy.muted) { setFace(c.id, 'speak'); setTimeout(() => setFace(c.id, 'idle'), 1600); return; }
-  setFace(c.id, 'speak'); speak(c.sample[getLang()], getLang(), c.voice, null, () => setFace(c.id, 'idle'));
+  setFace(c.id, 'speak'); speak(c.sample[getLang()], getLang(), { ...c.voice, id: c.id }, null, () => setFace(c.id, 'idle'));
 };
 ACT.toyMute = () => update(s => { s.toy.muted = !s.toy.muted; if (s.toy.muted) stopSpeaking(); });
 ACT.toyTog = el => update(s => { s.toy[el.dataset.k] = !s.toy[el.dataset.k]; });
@@ -772,7 +772,8 @@ function screenMeSub(which) {
     ${opt('setTheme', 'system', t('followSys'), set.theme === 'system')}${opt('setTheme', 'day', t('day') + ' · 🌸', set.theme === 'day')}${opt('setTheme', 'night', t('night') + ' · 🌙', set.theme === 'night')}</div></div>`;
   if (which === 'voice') return `${header(t('voice'), { back: true })}<div class="body"><div class="group">
     <button class="cell" data-act="toggleAuto">${t('autoplay')}<span class="tg ${set.autoplay ? 'on' : ''}"></span></button>
-    <button class="cell" data-act="voiceTest">${t('voiceTest')}<span class="v">▶</span></button></div>
+    <button class="cell" data-act="voiceTest">${t('voiceTest')}<span class="v">▶</span></button>
+    <a class="cell" href="voices.html" style="text-decoration:none;color:inherit">${t('charVoices')}<span class="v">›</span></a></div>
     <p class="note">${sttSupported ? '' : t('noStt')}</p></div>`;
   if (which === 'ai') return `${header(t('aiConn'), { back: true })}<div class="body">
     <div class="group"><div class="gt">${t('aiMode')}</div>${opt('setAi', 'demo', t('aiDemo'), set.aiMode === 'demo')}${opt('setAi', 'claude', t('aiClaude'), set.aiMode === 'claude')}</div>
