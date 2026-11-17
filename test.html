@@ -64,9 +64,9 @@ const T = {
     title: '悄悄话 · 试玩测试', intro: '谢谢你来试玩！这是一个还在设计中的 App，测的是 App 好不好用，不是测你。大约 15 分钟。',
     rules: ['想到什么可以直接说出来，说“我卡住了”也完全没问题。', '不要输入真实的个人信息（真名、电话、地址）。', '你的操作会被记录在这台电脑的浏览器里，只用于改进设计；你原来的 App 数据会先备份，结束后可以恢复。'],
     pid: '参与者编号（例如 P1，不写名字）', consent: '我已满 18 岁，同意参加这次试玩并被记录操作。', start: '开始',
-    t1: '任务 1 / 3', t1q: '温叙记错了一件事：他以为你喜欢草莓。请在 App 里把这条记忆改对，或者删掉。', t1done: '完成了',
-    t2: '任务 2 / 3', t2q: '现在你和温叙是什么关系阶段？在 App 里找到答案，然后在下面选择。', stages: ['初识', '熟悉', '暧昧', '心意相通'], next: '下一步', skip: '跳过这个任务',
-    t3: '任务 3 / 3', t3q: '分别给温叙和季屿发一句“今天好累”。两个人都回复以后，下面会出现两句回复（不写名字）。', t3wait: '等两个人都回复……', t3pick: '你觉得哪一句是温叙说的？', a: '回复 A', b: '回复 B', sure: '你有多确定？',
+    t1: '任务 1 / 3', t1q: '道允记错了一件事：他以为你喜欢草莓。请在 App 里把这条记忆改对，或者删掉。', t1done: '完成了',
+    t2: '任务 2 / 3', t2q: '现在你和道允是什么关系阶段？在 App 里找到答案，然后在下面选择。', stages: ['初识', '熟悉', '暧昧', '心意相通'], next: '下一步', skip: '跳过这个任务',
+    t3: '任务 3 / 3', t3q: '分别给道允和温叙发一句“今天好累”。两个人都回复以后，下面会出现两句回复（不写名字）。', t3wait: '等两个人都回复……', t3pick: '你觉得哪一句是道允说的？', a: '回复 A', b: '回复 B', sure: '你有多确定？',
     q: '最后几个问题', q1: '我能看懂他现在和我是什么关系。', q2: '我能分清两个角色说话的不同。', q3: '我觉得自己能控制他记住什么。', agree: ['完全不同意', '完全同意'],
     open: '哪一刻让你觉得他像一个真的人？哪一刻让你出戏？', finish: '提交',
     thanks: '谢谢你！测试结束了。', export: '把下面的记录发给 Wei（复制或截图都可以）。', copy: '复制记录', copied: '已复制', csv: '复制为表格一行', restore: '恢复我原来的 App 数据', restored: '已恢复', again: '下一位参与者',
@@ -76,9 +76,9 @@ const T = {
     title: 'Whisper · play test', intro: 'Thanks for trying the app! It is still being designed, and we are testing the app, not you. About 15 minutes.',
     rules: ['Think out loud. Saying “I’m stuck” is completely fine.', 'Please don’t type real personal details (real name, phone, address).', 'Your actions are logged in this browser only, to improve the design. Your own app data is backed up first and can be restored at the end.'],
     pid: 'Participant ID (e.g. P1, no names)', consent: 'I am 18 or older and agree to take part and have my actions logged.', start: 'Start',
-    t1: 'Task 1 / 3', t1q: 'Wen Xu remembers something wrong: he thinks you like strawberries. Fix that memory in the app, or delete it.', t1done: 'Done',
-    t2: 'Task 2 / 3', t2q: 'What relationship stage are you at with Wen Xu? Find it in the app, then choose below.', stages: ['Strangers', 'Friends', 'Something more', 'Mutual'], next: 'Next', skip: 'Skip this task',
-    t3: 'Task 3 / 3', t3q: 'Send “so tired today” to both Wen Xu and Ji Yu. Once both have replied, their two replies appear below without names.', t3wait: 'Waiting for both replies…', t3pick: 'Which one do you think is Wen Xu?', a: 'Reply A', b: 'Reply B', sure: 'How sure are you?',
+    t1: 'Task 1 / 3', t1q: 'Doyun remembers something wrong: he thinks you like strawberries. Fix that memory in the app, or delete it.', t1done: 'Done',
+    t2: 'Task 2 / 3', t2q: 'What relationship stage are you at with Doyun? Find it in the app, then choose below.', stages: ['Strangers', 'Friends', 'Something more', 'Mutual'], next: 'Next', skip: 'Skip this task',
+    t3: 'Task 3 / 3', t3q: 'Send “so tired today” to both Doyun and Wen Xu. Once both have replied, their two replies appear below without names.', t3wait: 'Waiting for both replies…', t3pick: 'Which one do you think is Doyun?', a: 'Reply A', b: 'Reply B', sure: 'How sure are you?',
     q: 'A few last questions', q1: 'I can tell what our relationship stage is.', q2: 'I can tell the two characters apart by how they talk.', q3: 'I feel in control of what he remembers.', agree: ['Strongly disagree', 'Strongly agree'],
     open: 'When did he feel like a real person? When did it break the spell?', finish: 'Submit',
     thanks: 'Thank you! The test is over.', export: 'Send this record to Wei (copy or screenshot).', copy: 'Copy record', copied: 'Copied', csv: 'Copy as a table row', restore: 'Restore my own app data', restored: 'Restored', again: 'Next participant',
@@ -97,7 +97,7 @@ const now = () => Date.now();
 function event(type, data = {}) { if (log) log.events.push({ t: Math.round((now() - log.started) / 100) / 10, type, ...data }); }
 
 // ---------- the test scenario ----------
-// A fresh app state: onboarded, Wen Xu on the toy at "Friends" with one wrong memory, Ji Yu added,
+// A fresh app state: onboarded, Doyun on the toy at "Friends" with one wrong memory, Wen Xu added,
 // proactive messages and auto-play off so nothing interrupts a task.
 async function loadFixture() {
   try { const cur = localStorage.getItem(APP_KEY); if (cur && !localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, cur); } catch (e) {}
@@ -107,10 +107,10 @@ async function loadFixture() {
     s.onboarded = true;
     s.settings.lang = lang; s.settings.autoplay = false; s.settings.proactive = false; s.settings.aiMode = 'demo';
     s.profile.name = log.pid;
-    s.toy.charId = 'wenxu'; s.face.charId = 'wenxu';
-    for (const id of Object.keys(s.chars)) { s.chars[id].pinned = id === 'wenxu'; s.chars[id].unread = 0; s.messages[id] = []; }
-    Object.assign(s.chars.wenxu, { owned: true, affinity: 34, memories: [{ id: MEM_ID, kind: 'like', value: lang === 'zh' ? '草莓' : 'strawberries', text: lang === 'zh' ? '喜欢草莓' : 'Likes strawberries', ts: now() }] });
-    Object.assign(s.chars.jiyu, { owned: true, affinity: 34, metAt: now() - 8 * 864e5 });
+    s.toy.charId = 'doyun'; s.face.charId = 'doyun';
+    for (const id of Object.keys(s.chars)) { s.chars[id].pinned = id === 'doyun'; s.chars[id].unread = 0; s.messages[id] = []; }
+    Object.assign(s.chars.doyun, { owned: true, affinity: 34, memories: [{ id: MEM_ID, kind: 'like', value: lang === 'zh' ? '草莓' : 'strawberries', text: lang === 'zh' ? '喜欢草莓' : 'Likes strawberries', ts: now() }] });
+    Object.assign(s.chars.wenxu, { owned: true, affinity: 34, metAt: now() - 8 * 864e5 });
   });
   await new Promise(r => setTimeout(r, 400));     // the store writes after 120 ms
 }
@@ -158,7 +158,7 @@ function task1() {
   const finish = (how) => { if (finished) return; finished = true; endTask('fix-memory', { success: how !== 'skipped', how }); $('#st').hidden = false; $('#st').textContent = '✓ ' + t('t1done'); setTimeout(task2, 1200); };
   watch(() => {
     const s = app(); if (!s) return;
-    const m = (s.chars.wenxu.memories || []).find(x => x.id === MEM_ID);
+    const m = (s.chars.doyun.memories || []).find(x => x.id === MEM_ID);
     if (!m) finish('deleted');
     else if (!/草莓|strawberr/i.test(m.text)) finish('edited');
   });
@@ -174,7 +174,7 @@ function task2() {
   panel.querySelectorAll('[name=stg]').forEach(r => r.onchange = () => { $('#nx').disabled = false; });
   const go = (skipped) => {
     const v = panel.querySelector('[name=stg]:checked');
-    const s = app(); const truth = s ? [0, 25, 50, 80].filter(x => s.chars.wenxu.affinity >= x).length - 1 : 1;
+    const s = app(); const truth = s ? [0, 25, 50, 80].filter(x => s.chars.doyun.affinity >= x).length - 1 : 1;
     endTask('find-stage', { success: !skipped && v && +v.value === truth, answer: v ? +v.value : null, truth, skipped: !!skipped });
     task3();
   };
@@ -189,10 +189,10 @@ function task3() {
   watch(() => {
     if (t3Pair) return;
     const s = app(); if (!s) return;
-    const w = firstReply(s, 'wenxu'), j = firstReply(s, 'jiyu');
+    const w = firstReply(s, 'doyun'), j = firstReply(s, 'wenxu');
     if (!w || !j) return;
     const wenFirst = Math.random() < 0.5;
-    t3Pair = { A: wenFirst ? w.text : j.text, B: wenFirst ? j.text : w.text, wenxuIs: wenFirst ? 'A' : 'B' };
+    t3Pair = { A: wenFirst ? w.text : j.text, B: wenFirst ? j.text : w.text, mainIs: wenFirst ? 'A' : 'B' };
     $('#wait').hidden = true;
     $('#pair').innerHTML = `<div class="quote"><b>${t('a')}</b><br>${esc(t3Pair.A)}</div><div class="quote"><b>${t('b')}</b><br>${esc(t3Pair.B)}</div>
       <p><b>${t('t3pick')}</b></p><label class="row"><input type="radio" name="who" value="A"><span>${t('a')}</span></label><label class="row"><input type="radio" name="who" value="B"><span>${t('b')}</span></label>
@@ -201,7 +201,7 @@ function task3() {
     panel.querySelectorAll('[name=who],[name=sure3]').forEach(r => r.onchange = () => { $('#nx').disabled = !(panel.querySelector('[name=who]:checked') && panel.querySelector('[name=sure3]:checked')); });
     $('#nx').onclick = () => {
       const who = panel.querySelector('[name=who]:checked').value;
-      endTask('tell-apart', { success: who === t3Pair.wenxuIs, picked: who, wenxuIs: t3Pair.wenxuIs, sure: +panel.querySelector('[name=sure3]:checked').value, replies: t3Pair });
+      endTask('tell-apart', { success: who === t3Pair.mainIs, picked: who, mainIs: t3Pair.mainIs, sure: +panel.querySelector('[name=sure3]:checked').value, replies: t3Pair });
       survey();
     };
   });
