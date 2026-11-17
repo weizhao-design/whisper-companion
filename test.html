@@ -70,7 +70,7 @@ const T = {
     q: '最后几个问题', q1: '我能看懂他现在和我是什么关系。', q2: '我能分清两个角色说话的不同。', q3: '我觉得自己能控制他记住什么。', agree: ['完全不同意', '完全同意'],
     open: '哪一刻让你觉得他像一个真的人？哪一刻让你出戏？', finish: '提交',
     thanks: '谢谢你！测试结束了。', export: '把下面的记录发给 Wei（复制或截图都可以）。', copy: '复制记录', copied: '已复制', csv: '复制为表格一行', restore: '恢复我原来的 App 数据', restored: '已恢复', again: '下一位参与者',
-    loading: '正在准备测试用的 App……', s: '秒',
+    loading: '正在准备测试用的 App……', s: '秒', slow: 'App 还没显示出来。可以再等几秒，或者刷新这个页面重试。', openNew: '在新窗口打开 App 看看能不能用 ↗', err: '准备测试场景时出错了，请把下面这行发给 Wei：',
   },
   en: {
     title: 'Whisper · play test', intro: 'Thanks for trying the app! It is still being designed, and we are testing the app, not you. About 15 minutes.',
@@ -82,7 +82,7 @@ const T = {
     q: 'A few last questions', q1: 'I can tell what our relationship stage is.', q2: 'I can tell the two characters apart by how they talk.', q3: 'I feel in control of what he remembers.', agree: ['Strongly disagree', 'Strongly agree'],
     open: 'When did he feel like a real person? When did it break the spell?', finish: 'Submit',
     thanks: 'Thank you! The test is over.', export: 'Send this record to Wei (copy or screenshot).', copy: 'Copy record', copied: 'Copied', csv: 'Copy as a table row', restore: 'Restore my own app data', restored: 'Restored', again: 'Next participant',
-    loading: 'Preparing the test app…', s: 's',
+    loading: 'Preparing the test app…', s: 's', slow: 'The app hasn’t appeared yet. Wait a few more seconds, or reload this page.', openNew: 'Open the app in a new tab to check it works ↗', err: 'Something went wrong preparing the test. Please send this line to Wei:',
   },
 };
 const t = k => T[lang][k];
@@ -114,10 +114,26 @@ async function loadFixture() {
   });
   await new Promise(r => setTimeout(r, 400));     // the store writes after 120 ms
 }
+// The cover comes off as soon as the app has drawn its first screen; the iframe's load event is
+// only a backup (it can arrive very late, or not at all, in some browsers).
+let coverTimer = null;
 function openApp() {
   cover.hidden = false; cover.textContent = t('loading');
+  clearInterval(coverTimer);
+  const done = () => { clearInterval(coverTimer); cover.hidden = true; };
+  frame.onload = done;
   frame.src = './index.html?frame=0&lang=' + lang + '&r=' + now() + '#/chats';
-  frame.onload = () => { cover.hidden = true; };
+  const t0 = now();
+  coverTimer = setInterval(() => {
+    try {
+      const root = frame.contentDocument && frame.contentDocument.getElementById('app');
+      if (root && root.children.length) return done();
+    } catch (e) {}
+    if (now() - t0 > 6000 && !cover.querySelector('a')) {
+      cover.innerHTML = `${esc(t('slow'))}<br><a href="./index.html" target="_blank" rel="noopener">${esc(t('openNew'))}</a>`;
+      event('app-slow');
+    }
+  }, 250);
 }
 function watch(check) {
   clearInterval(poll);
@@ -146,7 +162,13 @@ function intro() {
   $('#go').onclick = async () => {
     log = { pid: ($('#pid').value || 'P').trim().slice(0, 12), lang, started: now(), startedAt: new Date().toISOString(), ua: navigator.userAgent, tasks: [], answers: {}, events: [] };
     event('consent');
-    await loadFixture(); openApp(); task1();
+    try { await loadFixture(); }
+    catch (e) {
+      // show what went wrong instead of hanging on the loading screen
+      panel.insertAdjacentHTML('beforeend', `<p class="muted" style="color:var(--acc)">${esc(t('err'))}<br><code>${esc(e && (e.message || e))}</code></p>`);
+      return;
+    }
+    openApp(); task1();
   };
 }
 
