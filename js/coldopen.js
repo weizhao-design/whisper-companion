@@ -45,6 +45,55 @@ export const COLD_OPEN = {
     memory: { zh: '一把蓝色的伞落在他工作室门口，你们因此说上了话。', en: 'A blue umbrella left outside his studio got you two talking.' },
     note: { zh: '你们是因为一把蓝色的伞说上话的', en: 'a blue umbrella is how you two started talking' },
     scene: 'You have only just met. A blue umbrella was left outside your studio and you messaged the user because you think it is theirs; that is how you started talking. Keep the umbrella as a light running thread (they can pick it up, you joked about a coffee as a storage fee). Do not act as if you already know each other well.',
+    // Story beats after the cold open. Each fires once, the first time the user opens his chat
+    // on or after `day` (day 1 = the day they met), at most one per calendar day. They live in
+    // his line when the user comes back, not in extra proactive messages.
+    //   after     earlier beat whose choice picks this beat's lines/chips (key 'go' or 'maybe')
+    //   recalled  show "he unsent a message" first
+    //   chips: choice (remembered), memory (saved to shared memories), aff (raise affinity to at
+    //          least this; stage-up note but no stage event line), effect 'accept' | 'deflect'
+    //   sticky    typing your own reply does not dismiss the chips
+    beats: [
+      { id: 'invite', day: 3,
+        first: { zh: ['어，来了。', '这周末我们在圣水洞有个 pop-up。', '缺个人帮忙看场子……你来吗？'], en: ['어, you’re here.', 'We’re doing a pop-up in Seongsu this weekend.', 'We’re one person short… want to come help out?'] },
+        nodes: { root: [
+          { label: { zh: '去！', en: 'I’m in!' }, choice: 'go', aff: 25,
+            reply: { zh: ['ㅋㅋ 好。', '那我把你名字写进工作人员名单了。'], en: ['ㅋㅋ okay.', 'I’m putting your name on the staff list, then.'] },
+            memory: { zh: '你答应这周末去圣水洞的 pop-up 帮忙看场子。', en: 'You said you’d help out at the Seongsu pop-up this weekend.' } },
+          { label: { zh: '我考虑一下', en: 'Let me think about it' }, choice: 'maybe', aff: 25,
+            reply: { zh: ['ㅇㅇ 不急。', '想来的话，前一天跟我说。'], en: ['ㅇㅇ no rush.', 'If you want to come, just tell me the day before.'] },
+            memory: { zh: '他邀请你去圣水洞的 pop-up，你说考虑一下。', en: 'He invited you to the Seongsu pop-up; you said you’d think about it.' } },
+        ] } },
+      { id: 'slip', day: 5, after: 'invite', recalled: true,
+        firstBy: {
+          go: { zh: ['没什么，发错了。', '……今天谢谢你来。'], en: ['Nothing. Wrong chat.', '…Thanks for coming today.'] },
+          maybe: { zh: ['没什么，发错了。', '……pop-up 今天收了。你没来，有点可惜。'], en: ['Nothing. Wrong chat.', '…The pop-up wrapped today. Shame you didn’t make it.'] },
+        },
+        nodes: {
+          go: [
+            { label: { zh: '撤回了什么？', en: 'What was it?' }, aff: 50, reply: { zh: ['……一张照片。', '下次再给你看。'], en: ['…A photo.', 'I’ll show you next time.'] },
+              memory: { zh: '他撤回了一条消息，说是发错了。', en: 'He unsent a message and said it went to the wrong chat.' } },
+            { label: { zh: '下次还叫我', en: 'Invite me again' }, aff: 50, reply: { zh: ['ㅋㅋ 好。', '下次不用帮忙，就来玩。'], en: ['ㅋㅋ deal.', 'Next time you don’t have to help. Just come.'] },
+              memory: { zh: '他撤回了一条消息，说是发错了。', en: 'He unsent a message and said it went to the wrong chat.' } },
+          ],
+          maybe: [
+            { label: { zh: '撤回了什么？', en: 'What was it?' }, aff: 50, reply: { zh: ['……一张照片。', '下次再给你看。'], en: ['…A photo.', 'I’ll show you next time.'] },
+              memory: { zh: '他撤回了一条消息，说是发错了。', en: 'He unsent a message and said it went to the wrong chat.' } },
+            { label: { zh: '下次我一定去', en: 'Next time I’ll be there' }, aff: 50, reply: { zh: ['ㅋㅋ 记住了。', '我会提醒你的。'], en: ['ㅋㅋ noted.', 'I’ll hold you to it.'] },
+              memory: { zh: '他撤回了一条消息，说是发错了。', en: 'He unsent a message and said it went to the wrong chat.' } },
+          ],
+        } },
+      { id: 'confess', day: 9, sticky: true,
+        first: { zh: ['그냥…… 有件事想说。', '我好像，不只是把你当朋友。', '你不用现在回答。ㅋㅋ'], en: ['그냥… there’s something I want to say.', 'I think I see you as more than a friend.', 'You don’t have to answer now. ㅋㅋ'] },
+        nodes: { root: [
+          { label: { zh: '我也是', en: 'Me too' }, effect: 'accept',
+            reply: { zh: ['……真的？', '现在可以正大光明叫你核桃二号了。ㅋㅋ'], en: ['…Really?', 'Now I can call you Hodu number two for real. ㅋㅋ'] },
+            memory: { zh: '他说，不只是把你当朋友。你说，你也是。', en: 'He said he sees you as more than a friend. You said you do too.' } },
+          { label: { zh: '……再说吧', en: '…Let’s see' }, effect: 'deflect',
+            reply: { zh: ['ㅇㅇ 好。', '那就再说。我不急。'], en: ['ㅇㅇ okay.', 'Let’s see, then. I’m in no rush.'] },
+            memory: { zh: '他说，不只是把你当朋友。你说，再说吧。', en: 'He said he sees you as more than a friend. You said, let’s see.' } },
+        ] } },
+    ],
   },
 
   chengshuo: {

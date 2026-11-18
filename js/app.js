@@ -1,11 +1,11 @@
-import { t, L, setLang, getLang } from './i18n.js?v=25';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=25';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=25';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=25';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=25';
-import { claudeReply } from './claude.js?v=25';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=25';
-import { COLD_OPEN } from './coldopen.js?v=25';
+import { t, L, setLang, getLang } from './i18n.js?v=26';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=26';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=26';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=26';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=26';
+import { claudeReply } from './claude.js?v=26';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=26';
+import { COLD_OPEN } from './coldopen.js?v=26';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -302,34 +302,102 @@ function composer() {
   </div>${panel}`;
 }
 // ---------- cold-open quick replies (js/coldopen.js) ----------
+/** The active script (cold open or a story beat) for this chat, or null. */
+function activeScript(id, cs = S().chars[id]) {
+  const co = COLD_OPEN[id]; if (!co || !cs || !cs.script) return null;
+  if (cs.script.beat) { const beat = (co.beats || []).find(b => b.id === cs.script.beat); return beat ? { co, beat, nodes: beat.nodes } : null; }
+  return { co, beat: null, nodes: co.nodes };
+}
 function quickReplies() {
   const id = currentChat(); if (!id || ui.typing[id]) return '';
-  const cs = S().chars[id]; const co = COLD_OPEN[id];
-  if (!co || !cs || !cs.script) return '';
-  const chips = co.nodes[cs.script.at] || []; const lang = getLang();
+  const sc = activeScript(id); if (!sc) return '';
+  const chips = sc.nodes[S().chars[id].script.at] || []; const lang = getLang();
   return chips.length ? `<div class="qr">${chips.map((ch, i) => `<button data-act="qr" data-i="${i}">${esc(ch.label[lang] || ch.label.zh)}</button>`).join('')}</div>` : '';
 }
 ACT.qr = el => {
   const id = currentChat(); if (!id || ui.typing[id]) return;
-  const cs = S().chars[id]; const co = COLD_OPEN[id]; if (!co || !cs.script) return;
-  const chip = (co.nodes[cs.script.at] || [])[+el.dataset.i]; if (chip) playScript(id, co, chip);
+  const sc = activeScript(id); if (!sc) return;
+  const chip = (sc.nodes[S().chars[id].script.at] || [])[+el.dataset.i]; if (chip) playScript(id, sc, chip);
 };
-async function playScript(id, co, chip) {
-  const lang = getLang();
+async function playScript(id, sc, chip) {
+  const lang = getLang(); const { co, beat } = sc;
   if (busy[id]) await busy[id];
   let done; busy[id] = new Promise(r => done = r);
   try {
     update(s => {
       s.messages[id].push({ id: newId(), from: 'me', type: 'text', text: chip.label[lang], lang, ts: Date.now() });
-      s.chars[id].script = chip.next ? { at: chip.next } : null;
+      s.chars[id].script = chip.next ? { ...s.chars[id].script, at: chip.next } : null;
     });
     ui.typing[id] = true; setFace(id, 'think'); rerenderComposer(); onChange();
     await sleep(750 + Math.random() * 600);
     const night = (h => h >= 21 || h < 5)(new Date().getHours());
     const texts = chip.reply ? chip.reply[lang] : (co.closing ? co.closing[night ? 'night' : 'day'][lang] : []);
     const out = await pushHim(id, texts, lang);
-    update(st => { const cs2 = st.chars[id]; cs2.affinity = Math.min(100, cs2.affinity + 3); cs2.sync = Math.min(100, cs2.sync + 1); });
-    if (!chip.next) finishScript(id, lang);
+    update(st => { const cs2 = st.chars[id]; cs2.affinity = Math.min(affinityCap(id, cs2), cs2.affinity + 3); cs2.sync = Math.min(100, cs2.sync + 1); });
+    if (beat) finishBeatChip(id, beat, chip, lang);
+    else if (!chip.next) finishScript(id, lang);
+    ui.typing[id] = false; setFace(id, 'idle'); onChange(); rerenderComposer();
+    if (S().settings.autoplay && currentChat() === id && !S().toy.muted) playHim(id, out.filter(m => m.type === 'voice'));
+  } finally { done(); busy[id] = null; }
+}
+
+// ---------- story beats after the cold open (js/coldopen.js → beats) ----------
+const dayStart = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const dayKey = ts => new Date(ts).toDateString();
+/** Day 1 is the day you met. */
+function storyDay(cs) { return Math.round((dayStart(Date.now()) - dayStart(cs.metAt || Date.now())) / 864e5) + 1; }
+/** Before he has said it (or within a week of you deflecting) he does not slide into "Mutual" on his own. */
+function affinityCap(id, cs) {
+  const co = COLD_OPEN[id]; if (!co?.beats || !cs.coldOpened || !co.beats.some(b => b.id === 'confess')) return 100;
+  const cf = cs.beats?.confess;
+  if (cf?.choice === 'accept') return 100;
+  if (cf?.choice === 'deflect' && Date.now() > (cs.holdUntil || 0)) return 100;
+  return 79;
+}
+/** Raise affinity to at least `target` inside an update; note a stage change without his stage event line (the beat is the event). */
+function raiseTo(st, id, target) {
+  const cs = st.chars[id]; const before = stageOf(cs.affinity);
+  cs.affinity = Math.max(cs.affinity, Math.min(target, 100));
+  const after = stageOf(cs.affinity);
+  if (after > before) {
+    addMoment(cs, 'mStage', after);
+    st.messages[id].push({ id: newId(), from: 'sys', type: 'text', text: t('stageUp', { s: t('stage' + after) }), ts: Date.now() + 1 });
+  }
+}
+function finishBeatChip(id, beat, chip, lang) {
+  update(st => {
+    const cs = st.chars[id]; cs.script = null;
+    const rec = ((cs.beats ||= {})[beat.id] ||= { ts: Date.now() });
+    if (chip.choice) rec.choice = chip.choice;
+    if (chip.effect) rec.choice = chip.effect;
+    if (chip.memory) cs.memories.push({ id: newId(), kind: 'beat', beat: beat.id, text: chip.memory[lang] || chip.memory.zh, ts: Date.now() });
+    if (chip.aff) raiseTo(st, id, chip.aff);
+    if (chip.effect === 'accept') raiseTo(st, id, 80);
+    if (chip.effect === 'deflect') {
+      cs.holdUntil = Date.now() + 7 * 864e5;
+      st.messages[id].push({ id: newId(), from: 'sys', type: 'text', text: t('holdStage', { s: t('stage' + stageOf(cs.affinity)) }), ts: Date.now() + 1 });
+    }
+  });
+}
+/** When the user opens his chat on a new day, the next due beat arrives as his "you're back" line. */
+async function maybeBeat(id) {
+  const co = COLD_OPEN[id]; const cs = S().chars[id];
+  if (!co?.beats || !cs?.owned || !cs.coldOpened || cs.script || ui.typing[id] || busy[id]) return;
+  if (cs.lastBeatDay === dayKey(Date.now())) return;
+  const beat = co.beats.find(b => !cs.beats?.[b.id]);
+  if (!beat || storyDay(cs) < beat.day) return;
+  const lang = getLang(); const choice = beat.after ? (cs.beats?.[beat.after]?.choice === 'go' ? 'go' : 'maybe') : null;
+  let done; busy[id] = new Promise(r => done = r);
+  try {
+    update(st => {
+      const c2 = st.chars[id]; (c2.beats ||= {})[beat.id] = { ts: Date.now() }; c2.lastBeatDay = dayKey(Date.now());
+      if (beat.recalled) st.messages[id].push({ id: newId(), from: 'sys', type: 'text', text: t('recalled', { n: L(getChar(id).name) }), ts: Date.now() });
+    });
+    ui.typing[id] = true; setFace(id, 'think'); onChange();
+    await sleep(1100 + Math.random() * 600);
+    const lines = (beat.firstBy ? beat.firstBy[choice] : beat.first)[lang];
+    const out = await pushHim(id, lines, lang);
+    update(st => { st.chars[id].script = { beat: beat.id, at: beat.nodes.root ? 'root' : choice }; });
     ui.typing[id] = false; setFace(id, 'idle'); onChange(); rerenderComposer();
     if (S().settings.autoplay && currentChat() === id && !S().toy.muted) playHim(id, out.filter(m => m.type === 'voice'));
   } finally { done(); busy[id] = null; }
@@ -478,8 +546,10 @@ function addMoment(cs, key, arg) { if (!cs.moments.some(m => m.key === key && m.
 function sendUser(id, partial, { toy = false } = {}) {
   const lang = replyLangFor(partial.text || partial.transcript || '', S().settings);
   const msg = { id: partial.id || newId(), from: 'me', ts: Date.now(), lang, ...partial };
-  // typing your own reply instead of a quick reply ends the cold open after his answer
-  const scripted = !!(COLD_OPEN[id] && S().chars[id].script);
+  // typing your own reply instead of a quick reply ends the cold open (or a beat) after his answer;
+  // a "sticky" beat (the confession) keeps its chips until you pick one
+  const sc = activeScript(id);
+  const scripted = !!sc && !sc.beat?.sticky;
   update(s => {
     s.messages[id].push(msg);
     const cs = s.chars[id];
@@ -489,7 +559,7 @@ function sendUser(id, partial, { toy = false } = {}) {
     if (msg.type === 'gift') addMoment(cs, 'mFirstGift');
   });
   if (scripted) rerenderComposer();
-  respond(id, msg, { toy }).then(() => { if (scripted) finishScript(id); });
+  respond(id, msg, { toy }).then(() => { if (scripted && !sc.beat) finishScript(id); });
 }
 const busy = {};
 async function respond(id, trigger, { toy = false, avatarImage = null } = {}) {
@@ -536,7 +606,7 @@ async function respond(id, trigger, { toy = false, avatarImage = null } = {}) {
     // relationship
     update(st => {
       const cs2 = st.chars[id]; const before = stageOf(cs2.affinity);
-      cs2.affinity = Math.min(100, cs2.affinity + demo.affinity);
+      cs2.affinity = Math.min(Math.max(affinityCap(id, cs2), cs2.affinity), cs2.affinity + demo.affinity);
       cs2.sync = Math.min(100, cs2.sync + 1);
       cs2.mood = trigger.type === 'gift' || /爱|喜欢|love|like/i.test(trigger.text || '') ? 'happy' : (Date.now() - (st.messages[id].at(-3)?.ts || 0) > 864e5 ? 'miss' : 'calm');
       const after = stageOf(cs2.affinity);
@@ -598,19 +668,28 @@ function screenChatInfo(id) {
     <div class="group"><div class="gt">${t('replyMode')}</div>
       ${[['voicetext', 'modeVoiceText'], ['text', 'modeText'], ['voice', 'modeVoice']].map(([v, k]) => `<button class="cell" data-act="replyMode" data-v="${v}">${t(k)}<span class="chk">${cs.replyMode === v ? '✓' : ''}</span></button>`).join('')}
     </div>
+    ${COLD_OPEN[id]?.beats && cs.coldOpened ? `<div class="group"><div class="gt">${t('demoTitle')}</div><button class="cell" data-act="demoSkip">${t('demoSkip')}<span class="v">${t('dayN', { n: storyDay(cs) })} ›</span></button></div>` : ''}
     <div class="group"><button class="cell" data-act="pinChat">${getLang() === 'zh' ? '置顶聊天' : 'Pin chat'}<span class="tg ${cs.pinned ? 'on' : ''}"></span></button></div>
     <div class="group"><button class="cell danger" data-act="clearChat">${t('clearChat')}</button><button class="cell danger" data-act="resetRel">${t('resetRel')}</button></div>
     <div style="height:30px"></div></div>`;
 }
 const routeId = () => route().parts[1];
-ACT.delMem = el => update(s => { const cs = s.chars[routeId()]; cs.memories = cs.memories.filter(m => m.id !== el.dataset.id); });
+// demo only: pretend you met one day earlier, so the next story beat is due when you go back to the chat
+ACT.demoSkip = () => {
+  const id = routeId(); let n = 0;
+  update(s => { const cs = s.chars[id]; cs.metAt = (cs.metAt || Date.now()) - 864e5; cs.lastBeatDay = null; if (cs.holdUntil) cs.holdUntil -= 864e5; n = storyDay(cs); });
+  toast(t('demoSkipped', { n }));
+};
+ACT.delMem = el =>update(s => { const cs = s.chars[routeId()]; cs.memories = cs.memories.filter(m => m.id !== el.dataset.id); });
 ACT.addHc = () => { const inp = $('#hcnew'); const v = inp && inp.value.trim(); if (!v) return; update(s => { const cs = s.chars[routeId()]; (cs.headcanon ||= []).push({ id: newId(), text: v, ts: Date.now() }); }); };
 ACT.delHc = el => update(s => { const cs = s.chars[routeId()]; cs.headcanon = (cs.headcanon || []).filter(h => h.id !== el.dataset.id); });
 ACT.toggleProactive = () => update(s => { s.settings.proactive = s.settings.proactive === false; });
 ACT.replyMode = el => update(s => { s.chars[routeId()].replyMode = el.dataset.v; });
 ACT.pinChat = () => update(s => { const cs = s.chars[routeId()]; cs.pinned = !cs.pinned; });
 ACT.clearChat = async () => { if (await confirmSheet(t('confirmClear'))) update(s => { s.messages[routeId()] = []; }); };
-ACT.resetRel = async () => { if (await confirmSheet(t('confirmReset'))) update(s => { const cs = s.chars[routeId()]; cs.affinity = 0; cs.sync = 0; cs.moments = cs.moments.filter(m => m.key === 'mMet'); }); };
+ACT.resetRel = async () => { if (await confirmSheet(t('confirmReset'))) update(s => { const cs = s.chars[routeId()]; cs.affinity = 0; cs.sync = 0; cs.moments = cs.moments.filter(m => m.key === 'mMet');
+  // the story beats start over from day 1 too
+  if (cs.coldOpened) { cs.beats = {}; cs.holdUntil = 0; cs.lastBeatDay = null; cs.metAt = Date.now(); if (cs.script?.beat) cs.script = null; } }); };
 
 function screenChatSearch(id) {
   const f = ui.chatSearch.f;
@@ -893,6 +972,7 @@ function afterRender(parts, q) {
     else box.scrollTop = box.scrollHeight;
     bindComposer(b);
     maybeAvatarReaction(b);
+    maybeBeat(b);
   }
   if (a === 'chat' && c === 'info') {
     const cm = $('#callme'); if (cm) cm.addEventListener('change', () => update(s => { s.chars[b].callMe = cm.value.trim(); }));

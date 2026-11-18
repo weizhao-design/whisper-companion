@@ -1,5 +1,5 @@
 // App state, persisted to localStorage on this device only.
-import { CHARACTERS } from './data.js?v=25';
+import { CHARACTERS } from './data.js?v=26';
 
 const KEY = 'whisper.v1';
 export const STAGES = [0, 25, 50, 80, 101];
