@@ -114,6 +114,47 @@ export const COLD_OPEN = {
     memory: { zh: '你在急诊门口扭了脚，是他扶的你。', en: 'You twisted your ankle outside the ER, and he caught you.' },
     note: { zh: '你在急诊门口扭了脚，是他扶的你', en: 'you twisted your ankle outside the ER, and he caught you' },
     scene: 'You have only just met. Earlier today the user twisted their ankle outside the ER where you work and you caught them; before leaving they wrote their number on your clipboard, and you messaged to check on them. Do not act as if you already know each other well.',
+    beats: [
+      { id: 'invite', day: 3,
+        first: { zh: ['今天白班，难得早下班。', '脚怎么样了？……不是问诊，就是想知道。', '医院对面有家粥铺，开到很晚。要不要一起吃个饭？'], en: ['Day shift today. Off early for once.', 'How’s the ankle? …Not asking as a doctor. I just want to know.', 'There’s a congee place across from the hospital that stays open late. Want to get dinner?'] },
+        nodes: { root: [
+          { label: { zh: '好啊', en: 'Sure' }, choice: 'go', aff: 25,
+            reply: { zh: ['嗯。那七点，门口见。', '……走慢一点，我等你。'], en: ['Mm. Seven, then. At the entrance.', '…Walk slowly. I’ll wait.'] },
+            memory: { zh: '你答应和他去医院对面的粥铺吃饭。', en: 'You said yes to dinner at the congee place across from the hospital.' } },
+          { label: { zh: '今天不太方便', en: 'Not today' }, choice: 'maybe', aff: 25,
+            reply: { zh: ['好。那改天。', '记得按时吃饭。这是医嘱。'], en: ['Okay. Another day, then.', 'Eat on time. Doctor’s orders.'] },
+            memory: { zh: '他约你吃饭，你说今天不太方便。', en: 'He asked you to dinner; you said not today.' } },
+        ] } },
+      { id: 'late', day: 5, after: 'invite',
+        firstBy: {
+          go: { zh: ['今晚很长。刚交完班。', '……那家粥铺，我后来又去了一次。一个人，没那天好喝。'], en: ['Long night. Just handed over.', '…I went back to that congee place. Alone. It wasn’t as good as that night.'] },
+          maybe: { zh: ['今晚很长。刚交完班。', '……你说改天。我把那家粥铺存下来了，以防万一。'], en: ['Long night. Just handed over.', '…You said another day. I saved the congee place, just in case.'] },
+        },
+        nodes: {
+          go: [
+            { label: { zh: '今晚辛苦了', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
+              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+            { label: { zh: '下次我请你', en: 'Next time’s on me' }, aff: 50, reply: { zh: ['好。', '那我得好好排个班。'], en: ['Deal.', 'Then I’d better sort out my shifts.'] },
+              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+          ],
+          maybe: [
+            { label: { zh: '今晚辛苦了', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
+              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+            { label: { zh: '改天就是这周', en: 'Another day is this week' }, aff: 50, reply: { zh: ['……好。记住了。', '这周我白班多，你挑时间。'], en: ['…Okay. Noted.', 'I’m mostly on days this week. You pick.'] },
+              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+          ],
+        } },
+      { id: 'confess', day: 9, sticky: true,
+        first: { zh: ['有件事，我想了很久才决定说。', '我照顾过很多人。', '……但想每天确认好不好的，只有你一个。'], en: ['There’s something I’ve thought about for a long time.', 'I’ve looked after a lot of people.', '…But you’re the only one I want to check on every day.'] },
+        nodes: { root: [
+          { label: { zh: '我也是', en: 'Me too' }, effect: 'accept',
+            reply: { zh: ['……好。', '那以后，换我每天问你吃饭了没。小病号。'], en: ['…Okay.', 'Then from now on, I’m the one asking if you’ve eaten. Every day, patient.'] },
+            memory: { zh: '他说，想每天确认好不好的只有你。你说，你也是。', en: 'He said you’re the only one he wants to check on every day. You said you feel the same.' } },
+          { label: { zh: '……再说吧', en: '…Let’s see' }, effect: 'deflect',
+            reply: { zh: ['嗯。不急。', '我习惯等。等你也一样。'], en: ['Mm. No rush.', 'I’m used to waiting. Waiting for you is no different.'] },
+            memory: { zh: '他说，想每天确认好不好的只有你。你说，再说吧。', en: 'He said you’re the only one he wants to check on every day. You said, let’s see.' } },
+        ] } },
+    ],
   },
 
   wenxu: {
@@ -134,5 +175,46 @@ export const COLD_OPEN = {
     memory: { zh: '你们常在图书馆三楼靠窗的位置碰到。', en: 'You two keep running into each other at the library’s third-floor window seat.' },
     note: { zh: '你们常在图书馆三楼靠窗的位置碰到', en: 'you two keep running into each other at the library’s third-floor window seat' },
     scene: 'You have only just started talking. You and the user often end up at the third-floor window seats in the library; today they did not come and you messaged them, a little embarrassed about noticing. Do not act as if you already know each other well.',
+    beats: [
+      { id: 'invite', day: 3,
+        first: { zh: ['那个位置，今天我帮你留了。', '……我在画一个小书店的改造方案。', '你常看什么书？我想把书架，排成你会喜欢的样子。'], en: ['I saved that seat for you today.', '…I’m working on a design for a small bookshop.', 'What do you usually read? I’d like to arrange the shelves the way you’d like them.'] },
+        nodes: { root: [
+          { label: { zh: '我帮你看看方案', en: 'Show me the design' }, choice: 'go', aff: 25,
+            reply: { zh: ['……真的？', '那你就是这个方案的第一个甲方。'], en: ['…Really?', 'Then you’re this project’s first client.'] },
+            memory: { zh: '你答应帮他看小书店的改造方案。', en: 'You said you’d look at his bookshop design.' } },
+          { label: { zh: '你自己决定就好', en: 'Your call' }, choice: 'maybe', aff: 25,
+            reply: { zh: ['嗯。', '那我按我猜的排。……猜错了，要告诉我。'], en: ['Mm.', 'Then I’ll go with my guess. …Tell me if I get it wrong.'] },
+            memory: { zh: '他在画一个小书店，想按你喜欢的样子排书架。', en: 'He’s designing a small bookshop and wants the shelves to suit you.' } },
+        ] } },
+      { id: 'window', day: 5, after: 'invite',
+        firstBy: {
+          go: { zh: ['方案改到第三版了。', '……你上次随口说的那句，我加进去了。靠窗多了一张桌子。'], en: ['Third version of the design.', '…I added the thing you mentioned last time. There’s an extra table by the window now.'] },
+          maybe: { zh: ['方案改到第三版了。', '……靠窗那张桌子，我一直没删。不知道为什么。'], en: ['Third version of the design.', '…I never deleted the table by the window. Not sure why.'] },
+        },
+        nodes: {
+          go: [
+            { label: { zh: '给我看看', en: 'Let me see' }, aff: 50, reply: { zh: ['……嗯。', '明天带图纸去图书馆。老位置。'], en: ['…Mm.', 'I’ll bring the drawings to the library tomorrow. Our usual seat.'] },
+              memory: { zh: '他在方案里，靠窗留了一张桌子。', en: 'He kept a table by the window in his design.' } },
+            { label: { zh: '为什么加桌子', en: 'Why the table?' }, aff: 50, reply: { zh: ['……因为那里的光好。', '也因为，你会坐在那。'], en: ['…The light is good there.', 'And because you’d sit there.'] },
+              memory: { zh: '他在方案里，靠窗留了一张桌子。', en: 'He kept a table by the window in his design.' } },
+          ],
+          maybe: [
+            { label: { zh: '给我看看', en: 'Let me see' }, aff: 50, reply: { zh: ['……嗯。', '明天带图纸去图书馆。老位置。'], en: ['…Mm.', 'I’ll bring the drawings to the library tomorrow. Our usual seat.'] },
+              memory: { zh: '他在方案里，靠窗留了一张桌子。', en: 'He kept a table by the window in his design.' } },
+            { label: { zh: '为什么不删', en: 'Why keep it?' }, aff: 50, reply: { zh: ['……那里的光好。', '……也可能，是在等谁。'], en: ['…The light is good there.', '…Or maybe it’s waiting for someone.'] },
+              memory: { zh: '他在方案里，靠窗留了一张桌子。', en: 'He kept a table by the window in his design.' } },
+          ],
+        } },
+      { id: 'confess', day: 9, sticky: true,
+        first: { zh: ['我画过很多扇窗。', '以前都是为了光。', '……最近画的每一扇，都在想你会不会站在那。'], en: ['I’ve drawn a lot of windows.', 'They used to be about the light.', '…Lately, with every one, I wonder if you’d stand there.'] },
+        nodes: { root: [
+          { label: { zh: '我也是', en: 'Me too' }, effect: 'accept',
+            reply: { zh: ['……我需要一点时间，相信这是真的。', '那以后，你就是我唯一的甲方。'], en: ['…I need a moment to believe that.', 'Then from now on, you’re my only client.'] },
+            memory: { zh: '他说，画每一扇窗都在想你。你说，你也是。', en: 'He said every window he draws makes him think of you. You said you feel the same.' } },
+          { label: { zh: '……再说吧', en: '…Let’s see' }, effect: 'deflect',
+            reply: { zh: ['嗯。', '我不着急。窗户会一直在那里。'], en: ['Mm.', 'I’m not in a hurry. The window will still be there.'] },
+            memory: { zh: '他说，画每一扇窗都在想你。你说，再说吧。', en: 'He said every window he draws makes him think of you. You said, let’s see.' } },
+        ] } },
+    ],
   },
 };
