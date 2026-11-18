@@ -133,15 +133,15 @@ export const COLD_OPEN = {
         nodes: {
           go: [
             { label: { zh: '辛苦了', en: 'Rough night, huh' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
-              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+              memory: { zh: '他下夜班睡醒，第一个想起的是你。', en: 'Waking up after a night shift, you were the first person he thought of.' } },
             { label: { zh: '下次我请你', en: 'Next time’s on me' }, aff: 50, reply: { zh: ['好。', '那我得好好排个班。'], en: ['Deal.', 'Then I’d better sort out my shifts.'] },
-              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+              memory: { zh: '他下夜班睡醒，第一个想起的是你。', en: 'Waking up after a night shift, you were the first person he thought of.' } },
           ],
           maybe: [
             { label: { zh: '辛苦了', en: 'Rough night, huh' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
-              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+              memory: { zh: '他下夜班睡醒，第一个想起的是你。', en: 'Waking up after a night shift, you were the first person he thought of.' } },
             { label: { zh: '改天就是这周', en: 'This week, then' }, aff: 50, reply: { zh: ['……好。记住了。', '这周我白班多，你挑时间。'], en: ['…Okay. Noted.', 'I’m mostly on days this week. You pick.'] },
-              memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
+              memory: { zh: '他下夜班睡醒，第一个想起的是你。', en: 'Waking up after a night shift, you were the first person he thought of.' } },
           ],
         } },
       { id: 'confess', day: 9, sticky: true,

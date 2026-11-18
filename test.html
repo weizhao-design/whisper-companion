@@ -10,7 +10,7 @@
   @media (prefers-color-scheme: dark) { :root { --bg: #17141A; --card: #211D25; --ink: #EEE8F0; --muted: #A79EAB; --line: #3A3340; --soft: #2B2630; --acc: #E07A88; --on-acc: #17141A; --ok: #7FD1A8; color-scheme: dark; } }
   * { box-sizing: border-box; }
   html, body { margin: 0; height: 100%; }
-  body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
+  body { background: var(--bg); color: var(--ink); font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif; }
   .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(320px, 420px); height: 100%; }
   .stage { position: relative; min-width: 0; }
   .stage iframe { width: 100%; height: 100%; border: 0; display: block; }
@@ -55,7 +55,7 @@
 <script type="module">
 // Play test for the Whisper companion app. Everything stays in this browser: the tester's own
 // app data is backed up before the test and can be restored at the end.
-import { CHARACTERS } from './js/data.js?v=29';
+import { CHARACTERS } from './js/data.js?v=30';
 
 const APP_KEY = 'whisper.v1', BACKUP_KEY = 'whisper.v1.before-test', LOG_KEY = 'whisper.test.logs';
 const MEM_ID = 'fixture-strawberry';
@@ -103,7 +103,7 @@ function event(type, data = {}) { if (log) log.events.push({ t: Math.round((now(
 async function loadFixture() {
   try { const cur = localStorage.getItem(APP_KEY); if (cur && !localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, cur); } catch (e) {}
   localStorage.removeItem(APP_KEY);
-  const store = await import('./js/store.js?v=29&fixture=' + now());
+  const store = await import('./js/store.js?v=30&fixture=' + now());
   store.update(s => {
     s.onboarded = true;
     s.settings.lang = lang; s.settings.autoplay = false; s.settings.proactive = false; s.settings.aiMode = 'demo';

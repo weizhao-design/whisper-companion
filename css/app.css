@@ -16,7 +16,7 @@ html, body { margin: 0; height: 100%; }
 :root { --sat: env(safe-area-inset-top); --sab: env(safe-area-inset-bottom); }
 body {
   background: var(--bg); color: var(--ink); overscroll-behavior: none;
-  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
+  font: 15px/1.5 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", "PingFang SC", "Microsoft YaHei", "Noto Sans SC", system-ui, sans-serif;
 }
 
 /* ---------- iPhone 15 Pro frame (desktop / ?frame=1) ----------
