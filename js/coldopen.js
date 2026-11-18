@@ -228,9 +228,9 @@ export const COLD_OPEN = {
     },
     nodes: {
       root: [
-        { label: { zh: '我在听歌词', en: 'I was listening to the lyrics' },
+        { label: { zh: '我在听歌词', en: 'The lyrics, actually' },
           reply: { zh: ['哦。', '那首是我写的词。……行吧，算你有眼光。'], en: ['Oh.', 'I wrote those lyrics. …Fine, guess you’ve got taste.'] } },
-        { label: { zh: '你怎么知道是我？', en: 'How did you know it was me?' },
+        { label: { zh: '你怎么知道是我？', en: 'How’d you know?' },
           reply: { zh: ['第一排就那么几个人。', '你还站在灯底下。很难不看到好吗。'], en: ['There are like five people in the front row.', 'And you were standing right under the light. Kind of hard to miss.'] } },
       ],
     },

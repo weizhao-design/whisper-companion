@@ -1,5 +1,5 @@
 // App state, persisted to localStorage on this device only.
-import { CHARACTERS } from './data.js?v=33';
+import { CHARACTERS } from './data.js?v=34';
 
 // ?fresh=1 (the portfolio's "replay the first launch" link) uses its own storage and starts empty
 // every time, so a visitor can see the splash and onboarding again without losing their own data.

@@ -1,7 +1,7 @@
 // Offline "demo" reply engine: intent matching + per-character lines.
-import { L, isZh } from './i18n.js?v=33';
-import { nowDoing, isBusy } from './data.js?v=33';
-import { stageOf } from './store.js?v=33';
+import { L, isZh } from './i18n.js?v=34';
+import { nowDoing, isBusy } from './data.js?v=34';
+import { stageOf } from './store.js?v=34';
 
 const RX = {
   love: /(喜欢你|爱你|我喜欢你|i love you|love you|i like you|like you a lot)/i,
