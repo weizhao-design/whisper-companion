@@ -1,11 +1,11 @@
-import { t, L, setLang, getLang } from './i18n.js?v=30';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=30';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=30';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=30';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=30';
-import { claudeReply } from './claude.js?v=30';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=30';
-import { COLD_OPEN } from './coldopen.js?v=30';
+import { t, L, setLang, getLang } from './i18n.js?v=31';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=31';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=31';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=31';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=31';
+import { claudeReply } from './claude.js?v=31';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=31';
+import { COLD_OPEN } from './coldopen.js?v=31';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -152,28 +152,95 @@ const ACT = {
   back: () => history.length > 1 ? history.back() : go('#/chats'),
 };
 
-// ======================= ONBOARDING =======================
-function screenOnboard() {
+// ======================= SPLASH =======================
+// Every launch plays the app icon's "question and answer": the small bubble, then three dots
+// typing, then the last dot turns into a heart. A brand-new user then gets a lock-screen style
+// whisper (the cold opens, still unread) and taps it to start onboarding.
+// Designed in Figma (pages "开屏与 Onboarding · …"). ?nosplash=1 skips it (the play-test page).
+function splashMark() {
+  return `<svg class="sp-mark" viewBox="0 0 100 100" aria-hidden="true">
+  <g class="sp-back" transform="translate(5 -4) rotate(6 70 28)"><path d="M82 18C74 14 60 15 56 22C52 29 57 37 66 38L70 38L74 43L74 37C82 35 88 24 82 18Z" fill="#E9C887"/></g>
+  <g class="sp-front" transform="translate(-4 8) rotate(-8 50 50) scale(.92)"><path d="M29 29C43 22 70 22 79 34C87 46 79 62 62 64C54 65 47 64 41 63L29 75L32 61C21 56 17 37 29 29Z" fill="#FFF0E6"/>
+  <circle class="sp-d1" cx="38" cy="45" r="3.4" fill="#C2416A" fill-opacity=".42"/><circle class="sp-d2" cx="49" cy="45" r="3.4" fill="#C2416A" fill-opacity=".7"/><circle class="sp-d3" cx="60" cy="45" r="3.4" fill="#C2416A"/>
+  <path class="sp-heart" d="M0 5C-7 0-7.5-6-3.5-7C-1.5-7.4 0-6 0-4.5C0-6 1.5-7.4 3.5-7C7.5-6 7 0 0 5Z" transform="translate(62 44.5) scale(.82)" fill="#C2416A"/></g></svg>`;
+}
+/** The unread first lines a new user is about to receive, newest first (Doyun on top). */
+function unreadPreviews(lang) {
   const s = S();
-  return `<div class="body"><div class="onb" style="padding-top:calc(var(--sat) + 40px)">
-    <div class="big" style="width:132px">${appIconSvg()}</div>
-    <h2>${t('welcome')} · ${t('appName')}</h2><p>${t('welcomeSub')}</p>
-    <div class="seg" style="align-self:stretch;margin:4px 0">
-      <button class="${s.settings.lang === 'zh' ? 'on' : ''}" data-lang="zh">中文</button><button class="${s.settings.lang === 'en' ? 'on' : ''}" data-lang="en">English</button></div>
-    <div class="card" style="align-self:stretch;text-align:left">
-      <label style="font-size:13px;color:var(--muted)">${t('whatName')}</label>
-      <input id="ob-name" type="text" maxlength="12" placeholder="${t('namePh')}" value="${esc(s.profile.name)}" style="width:100%;margin-top:6px;border:1px solid var(--line);border-radius:10px;padding:10px;background:var(--bg);outline:0">
-      <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:12.5px;color:var(--muted);text-align:left"><input id="ob-age" type="checkbox" style="margin-top:3px;accent-color:var(--acc)">${t('ageGate')}</label>
-    </div>
-    <button class="btn p block" id="ob-start" disabled style="opacity:.5">${t('start')}</button>
-  </div></div>`;
+  return CHARACTERS.filter(c => s.chars[c.id]?.owned).map(c => {
+    const co = COLD_OPEN[c.id];
+    const text = co ? (co.voice ? `${t('voiceTag')} ` : '') + co.first[lang][0] + (co.first[lang].length > 1 && !co.voice ? co.first[lang][1] : '') : `${t('voiceTag')} ${c.opener[lang]}`;
+    return { id: c.id, name: L(c.name), text, min: co ? co.minutesAgo : 40 };
+  }).sort((a, b) => a.min - b.min);
+}
+const agoText = m => m < 5 ? t('justNow') : m < 60 ? t('minAgo', { n: m }) : t('hAgo', { n: Math.round(m / 60) });
+function notifCard(n, cls = '') {
+  return `<div class="sp-n ${cls}"><div class="sp-nh"><span class="sp-ni">${appIconSvg()}</span>${t('appName')}<i></i>${agoText(n.min)}</div><div class="sp-nt">${esc(n.name)}</div><div class="sp-nb">${esc(n.text)}</div></div>`;
+}
+function notifStack(list) {
+  return list.length ? `<div class="sp-stack">${notifCard(list[0], 'n0')}${list[1] ? '<div class="sp-n n1"></div>' : ''}${list[2] ? '<div class="sp-n n2"></div>' : ''}</div>` : '';
+}
+function showSplash() {
+  if (new URLSearchParams(location.search).get('nosplash') === '1') return;
+  const fresh = !S().onboarded; const lang = getLang();
+  const host = document.body.classList.contains('device') ? $('#screen') : document.body;
+  const el = document.createElement('div');
+  el.className = 'splash' + (fresh ? ' fresh' : '') + (host === document.body ? ' fixed' : '');
+  const list = fresh ? unreadPreviews(lang) : [];
+  el.innerHTML = `<div class="sp-glow"></div><div class="sp-icon">${splashMark()}</div><div class="sp-word">${t('appName')}</div><div class="sp-tag">${t('spTag')}</div>
+    ${fresh ? `<div class="sp-notifs">${notifStack(list)}<p class="sp-hint">${t('spUnread', { n: list.length })}</p></div>` : ''}`;
+  host.appendChild(el);
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 380); };
+  if (fresh) {
+    const showN = () => el.classList.add('show-n');
+    const timer = setTimeout(showN, reduce ? 300 : 2100);
+    el.addEventListener('click', () => { if (!el.classList.contains('show-n')) { clearTimeout(timer); showN(); } else close(); });
+  } else {
+    const timer = setTimeout(close, reduce ? 500 : 2300);
+    el.addEventListener('click', () => { clearTimeout(timer); close(); });
+  }
+}
+
+// ======================= ONBOARDING =======================
+// A conversation, not a form: the app asks for a name, checks the age, then says who is waiting.
+// The unread whispers stay blurred at the top the whole time.
+function screenOnboard() {
+  const s = S(); const lang = getLang();
+  const ob = ui.ob ||= { step: 'name', name: s.profile.name || '' };
+  const list = unreadPreviews(lang);
+  const av = `<span class="av">${appIconSvg()}</span>`;
+  const say = (arr, isNew) => `<div class="msg him ${isNew ? 'ob-new' : ''}">${av}<div class="col">${arr.map(x => `<div class="bub">${esc(x)}</div>`).join('')}</div></div>`;
+  const me = x => `<div class="msg me"><div class="col"><div class="bub">${esc(x)}</div></div></div>`;
+  const step = ob.step;
+  let chat = say([t('obAsk1'), t('obAsk2'), t('obAsk3')], step === 'name');
+  if (step !== 'name') chat += me(ob.name) + say([t('obGotName', { n: ob.name }), t('obAge1'), t('obAge2')], step === 'age');
+  if (step === 'ready') chat += me(t('obAdult')) + say([t('obOk'), t('obWaiting', { n: list.length }), t('obYouPick')], true);
+  if (step === 'minor') chat += me(t('obMinor')) + say([t('obBye1'), t('obBye2')], true);
+  const bottom = step === 'name'
+    ? `<form class="ob-in" id="ob-form"><input id="ob-name" type="text" maxlength="12" autocomplete="off" placeholder="${t('namePh')}" value="${esc(ob.name)}" aria-label="${t('whatName')}"><button class="ob-send" aria-label="${lang === 'zh' ? '发送' : 'Send'}"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form>`
+    : step === 'age'
+      ? `<div class="qr"><button data-act="obAge" data-v="adult">${t('obAdult')}</button><button data-act="obAge" data-v="minor">${t('obMinor')}</button></div><p class="ob-note">${t('obAiNote')}</p>`
+      : step === 'ready' ? `<div class="ob-go"><button class="btn p block" data-act="obGo">${t('obGo')}</button></div>` : '<div class="ob-go"></div>';
+  return `<div class="ob">
+    <div class="ob-top"><div class="ob-peek">${notifStack(list.slice(0, 2))}</div>${list.length ? `<span class="ob-badge">${t('unreadN', { n: list.length })}</span>` : ''}
+      <button class="ob-lang" data-act="obLang">中 / EN</button></div>
+    <div class="chat ob-chat" id="ob-chat">${chat}</div>${bottom}</div>`;
 }
 function bindOnboard() {
-  app.querySelectorAll('[data-lang]').forEach(b => b.onclick = () => { update(s => { s.settings.lang = b.dataset.lang; s.profile.name = $('#ob-name').value.trim(); }); });
-  const age = $('#ob-age'), btn = $('#ob-start');
-  age.onchange = () => { btn.disabled = !age.checked; btn.style.opacity = age.checked ? 1 : .5; };
-  btn.onclick = () => {
-    const name = $('#ob-name').value.trim();
+  const box = $('#ob-chat'); if (box) box.scrollTop = box.scrollHeight;
+  const form = $('#ob-form');
+  if (form) form.onsubmit = e => {
+    e.preventDefault();
+    const inp = $('#ob-name'); const name = inp.value.trim();
+    if (!name) { inp.focus(); inp.classList.add('shake'); setTimeout(() => inp.classList.remove('shake'), 400); return; }
+    ui.ob = { step: 'age', name }; render();
+  };
+}
+ACT.obLang = () => { const inp = $('#ob-name'); if (inp && ui.ob) ui.ob.name = inp.value.trim(); update(s => { s.settings.lang = s.settings.lang === 'zh' ? 'en' : 'zh'; }); render(); };
+ACT.obAge = el => { ui.ob.step = el.dataset.v === 'adult' ? 'ready' : 'minor'; render(); };
+ACT.obGo = () => { const name = ui.ob?.name || ''; ui.ob = null; finishOnboard(name); };
+function finishOnboard(name) {
     update(s => {
       s.onboarded = true; s.profile.name = name;
       const lang = s.settings.lang; const now = Date.now();
@@ -196,7 +263,6 @@ function bindOnboard() {
       });
     });
     go('#/chats'); render(true);
-  };
 }
 function appIconSvg() {
   return `<svg viewBox="0 0 100 100" style="border-radius:22.37%;display:block"><defs><linearGradient id="aig" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2E2240"/><stop offset="1" stop-color="#141017"/></linearGradient></defs>
@@ -1070,6 +1136,7 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 // ---------- boot ----------
 if (!location.hash) history.replaceState(null, '', '#/chats');
 render(true);
+showSplash();
 setTimeout(maybeProactive, 2500);
 if ('serviceWorker' in navigator && location.protocol === 'https:') navigator.serviceWorker.register('sw.js').catch(() => {});
 window.addEventListener('beforeunload', save);
