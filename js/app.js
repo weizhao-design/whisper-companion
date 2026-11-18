@@ -1,10 +1,11 @@
-import { t, L, setLang, getLang } from './i18n.js?v=24';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=24';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=24';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=24';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=24';
-import { claudeReply } from './claude.js?v=24';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=24';
+import { t, L, setLang, getLang } from './i18n.js?v=25';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=25';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=25';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=25';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=25';
+import { claudeReply } from './claude.js?v=25';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=25';
+import { COLD_OPEN } from './coldopen.js?v=25';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -42,7 +43,8 @@ function fmtStamp(ts) {
 }
 function preview(m) {
   if (!m) return '';
-  if (m.type === 'voice') return `${t('voiceTag')} ${m.dur || 1}″`;
+  // his voice notes that already show their text preview that text, so the chat list reads like a story hook
+  if (m.type === 'voice') return m.from === 'him' && m.showText && m.text ? `${t('voiceTag')} ${m.text}` : `${t('voiceTag')} ${m.dur || 1}″`;
   if (m.type === 'image') return t('photo');
   if (m.type === 'gift' || m.type === 'care') return `${t('giftTag')} ${L(m.giftName)}`;
   if (m.type === 'avatar') return t('youChangedAvatar');
@@ -176,6 +178,18 @@ function bindOnboard() {
       s.onboarded = true; s.profile.name = name;
       const lang = s.settings.lang; const now = Date.now();
       CHARACTERS.filter(c => s.chars[c.id].owned).forEach((c, i) => {
+        const co = COLD_OPEN[c.id];
+        if (co) {
+          // cold open: he starts in the middle of something; quick replies take it from there
+          const lines = co.first[lang]; const t0 = now - co.minutesAgo * 60000;
+          lines.forEach((text, j) => s.messages[c.id].push(co.voice && j === 0
+            ? { id: newId(), from: 'him', type: 'voice', text, transcript: text, dur: estDur(text, lang), lang, showText: true, ts: t0 + j * 20000 }
+            : { id: newId(), from: 'him', type: 'text', text, lang, ts: t0 + j * 20000 }));
+          s.chars[c.id].unread = lines.length;
+          s.chars[c.id].script = { at: 'root' };
+          s.chars[c.id].coldOpened = true;
+          return;
+        }
         const text = c.opener[lang];
         s.messages[c.id].push({ id: newId(), from: 'him', type: 'voice', text, transcript: text, dur: estDur(text, lang), lang, showText: true, ts: now - (i ? 40 : 130) * 60000 });
         s.chars[c.id].unread = 1;
@@ -248,6 +262,7 @@ function chatMessages(id, hlId) {
 }
 function wave(n) { return `<span class="wave">${[8, 14, 10, 16, 9].slice(0, n).map(h => `<i style="height:${h}px"></i>`).join('')}</span>`; }
 function renderMsg(m, c, isHl) {
+  if (m.from === 'sys' && m.kind === 'memNote') return `<button class="sys note" data-go="#/chat/${c.id}/info">${esc(m.text)} ›</button>`;
   if (m.from === 'sys') return `<div class="sys">${esc(m.text)}</div>`;
   if (m.type === 'avatar') return `<div class="sys">${t('youChangedAvatar')}</div>`;
   const mine = m.from === 'me';
@@ -279,13 +294,71 @@ function composer() {
       <button data-act="panel" data-p="care"><span>☕</span>${t('care')}</button><button data-act="panel" data-p="gift"><span>🎁</span>${t('gift')}</button></div>`
     : ui.panel === 'care' || ui.panel === 'gift' ? `<div class="picker"><div class="pt-t">${t(ui.panel)}<button data-act="panel" data-p="plus">‹</button></div>
       ${(ui.panel === 'gift' ? GIFTS : CARES).map(g => `<button data-act="giveItem" data-kind="${ui.panel}" data-id="${g.id}"><b>${g.icon}</b>${esc(L(g.name))}</button>`).join('')}</div>` : '';
-  return `<div class="composer">
+  return `${quickReplies()}<div class="composer">
     <button class="cb" data-act="toggleInput" aria-label="${voice ? 'keyboard' : 'voice'}">${icon(voice ? 'i-kbd' : 'i-mic')}</button>
     ${voice ? `<button class="hold" id="hold">${t('holdTalk')}</button>` : `<textarea id="txt" rows="1" placeholder="${t('inputPh')}">${esc(ui.draft || '')}</textarea>`}
     ${!voice ? `<button class="send" data-act="sendText">${getLang() === 'zh' ? '发送' : 'Send'}</button>` : ''}
     <button class="cb" data-act="panel" data-p="plus" aria-label="more">${icon('i-plus')}</button>
   </div>${panel}`;
 }
+// ---------- cold-open quick replies (js/coldopen.js) ----------
+function quickReplies() {
+  const id = currentChat(); if (!id || ui.typing[id]) return '';
+  const cs = S().chars[id]; const co = COLD_OPEN[id];
+  if (!co || !cs || !cs.script) return '';
+  const chips = co.nodes[cs.script.at] || []; const lang = getLang();
+  return chips.length ? `<div class="qr">${chips.map((ch, i) => `<button data-act="qr" data-i="${i}">${esc(ch.label[lang] || ch.label.zh)}</button>`).join('')}</div>` : '';
+}
+ACT.qr = el => {
+  const id = currentChat(); if (!id || ui.typing[id]) return;
+  const cs = S().chars[id]; const co = COLD_OPEN[id]; if (!co || !cs.script) return;
+  const chip = (co.nodes[cs.script.at] || [])[+el.dataset.i]; if (chip) playScript(id, co, chip);
+};
+async function playScript(id, co, chip) {
+  const lang = getLang();
+  if (busy[id]) await busy[id];
+  let done; busy[id] = new Promise(r => done = r);
+  try {
+    update(s => {
+      s.messages[id].push({ id: newId(), from: 'me', type: 'text', text: chip.label[lang], lang, ts: Date.now() });
+      s.chars[id].script = chip.next ? { at: chip.next } : null;
+    });
+    ui.typing[id] = true; setFace(id, 'think'); rerenderComposer(); onChange();
+    await sleep(750 + Math.random() * 600);
+    const night = (h => h >= 21 || h < 5)(new Date().getHours());
+    const texts = chip.reply ? chip.reply[lang] : (co.closing ? co.closing[night ? 'night' : 'day'][lang] : []);
+    const out = await pushHim(id, texts, lang);
+    update(st => { const cs2 = st.chars[id]; cs2.affinity = Math.min(100, cs2.affinity + 3); cs2.sync = Math.min(100, cs2.sync + 1); });
+    if (!chip.next) finishScript(id, lang);
+    ui.typing[id] = false; setFace(id, 'idle'); onChange(); rerenderComposer();
+    if (S().settings.autoplay && currentChat() === id && !S().toy.muted) playHim(id, out.filter(m => m.type === 'voice'));
+  } finally { done(); busy[id] = null; }
+}
+/** His scripted lines, one by one, in his usual reply mode. */
+async function pushHim(id, texts, lang) {
+  const mode = S().chars[id].replyMode; const out = [];
+  for (let i = 0; i < texts.length; i++) {
+    if (i) { ui.typing[id] = true; onChange(); await sleep(Math.min(2200, 500 + texts[i].length * 40)); }
+    const text = texts[i];
+    const m = mode === 'text'
+      ? { id: newId(), from: 'him', type: 'text', text, lang, ts: Date.now() }
+      : { id: newId(), from: 'him', type: 'voice', text, transcript: text, dur: estDur(text, lang), lang, showText: mode === 'voicetext', ts: Date.now() };
+    out.push(m); ui.typing[id] = i < texts.length - 1;
+    update(st => { st.messages[id].push(m); if (currentChat() !== id) st.chars[id].unread++; });
+  }
+  return out;
+}
+/** End of the cold open: save the branch-neutral first shared memory and show a note that links to it. */
+function finishScript(id, lang = getLang()) {
+  const co = COLD_OPEN[id]; if (!co) return;
+  update(st => {
+    const cs = st.chars[id]; cs.script = null;
+    if (cs.memories.some(m => m.kind === 'first')) return;
+    cs.memories.unshift({ id: newId(), kind: 'first', text: co.memory[lang] || co.memory.zh, ts: Date.now() });
+    st.messages[id].push({ id: newId(), from: 'sys', kind: 'memNote', type: 'text', text: t('memNote', { n: co.who[lang] || co.who.zh, m: co.note[lang] || co.note.zh }), ts: Date.now() + 2 });
+  });
+}
+
 function refreshChat(id, { scroll = true } = {}) {
   const box = $('#chat'); if (!box) return;
   const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 140;
@@ -303,7 +376,7 @@ ACT.camera = () => $('#f-camera').click();
 function rerenderComposer(focus) {
   const id = currentChat(); if (!id) return;
   const scr = $('.screen', app);
-  scr.querySelectorAll('.composer, .plus, .picker').forEach(n => n.remove());
+  scr.querySelectorAll('.qr, .composer, .plus, .picker').forEach(n => n.remove());
   scr.insertAdjacentHTML('beforeend', composer());
   bindComposer(id);
   if (focus && ui.inputMode === 'text') $('#txt')?.focus();
@@ -405,14 +478,18 @@ function addMoment(cs, key, arg) { if (!cs.moments.some(m => m.key === key && m.
 function sendUser(id, partial, { toy = false } = {}) {
   const lang = replyLangFor(partial.text || partial.transcript || '', S().settings);
   const msg = { id: partial.id || newId(), from: 'me', ts: Date.now(), lang, ...partial };
+  // typing your own reply instead of a quick reply ends the cold open after his answer
+  const scripted = !!(COLD_OPEN[id] && S().chars[id].script);
   update(s => {
     s.messages[id].push(msg);
     const cs = s.chars[id];
+    if (scripted) cs.script = null;
     if (msg.type === 'voice') addMoment(cs, 'mFirstVoice');
     if (msg.type === 'image') addMoment(cs, 'mFirstPhoto');
     if (msg.type === 'gift') addMoment(cs, 'mFirstGift');
   });
-  respond(id, msg, { toy });
+  if (scripted) rerenderComposer();
+  respond(id, msg, { toy }).then(() => { if (scripted) finishScript(id); });
 }
 const busy = {};
 async function respond(id, trigger, { toy = false, avatarImage = null } = {}) {

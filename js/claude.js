@@ -1,8 +1,9 @@
 // Optional real-AI mode: calls the Claude Messages API straight from the browser
 // with the user's own key (kept in localStorage on their device).
 // Raw fetch is used because this is a build-free static site on GitHub Pages.
-import { nowDoing, isBusy } from './data.js?v=24';
-import { stageOf } from './store.js?v=24';
+import { nowDoing, isBusy } from './data.js?v=25';
+import { stageOf } from './store.js?v=25';
+import { COLD_OPEN } from './coldopen.js?v=25';
 
 const MODEL = 'claude-opus-5-5';
 const STAGE_EN = ['strangers who just met', 'friends getting comfortable', 'flirting — clearly into each other but not official', 'mutual feelings, openly affectionate'];
@@ -20,7 +21,7 @@ function systemPrompt({ char, cs, state, lang, avatarEvent }) {
 Character: ${char.persona}
 ${speech}Background: ${char.bio.en} Likes: ${char.likes.en}. Birthday: ${char.birthday.en}. Catchphrase: "${char.catchphrase.en}" / "${char.catchphrase.zh}".
 
-Relationship with the user: ${STAGE_EN[stageOf(cs.affinity)]}. Match your warmth and boldness to this stage.
+Relationship with the user: ${STAGE_EN[stageOf(cs.affinity)]}. Match your warmth and boldness to this stage.${cs.coldOpened && COLD_OPEN[char.id] ? `\nHow you two met: ${COLD_OPEN[char.id].scene}` : ''}
 The user: call them "${cs.callMe || p.name || (lang === 'zh' ? '你' : 'you')}". ${p.birthday ? `Birthday: ${p.birthday}. ` : ''}${p.likes ? `Likes: ${p.likes}. ` : ''}
 Things you remember about the user:
 ${mems}

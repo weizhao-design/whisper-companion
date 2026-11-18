@@ -1,5 +1,5 @@
 // App state, persisted to localStorage on this device only.
-import { CHARACTERS } from './data.js?v=24';
+import { CHARACTERS } from './data.js?v=25';
 
 const KEY = 'whisper.v1';
 export const STAGES = [0, 25, 50, 80, 101];
@@ -22,12 +22,12 @@ function seed() {
   return s;
 }
 
-// Starting relationship for each character: Doyun is the one on the toy,
-// so he starts furthest along.
+// Starting relationship for each character: everyone starts as strangers met
+// today. Their cold opens (js/coldopen.js) are the first meeting.
 const PRESET = {
-  doyun: { aff: 62, sync: 70, days: 30, pinned: true, moments: [['mStage', 2, 5], ['mFirstGift', null, 12], ['mFirstVoice', null, 24], ['mMet', null, 30]] },
-  wenxu: { aff: 52, sync: 55, days: 20, moments: [['mStage', 2, 5], ['mFirstGift', null, 12], ['mFirstVoice', null, 24], ['mMet', null, 30]] },
-  chengshuo: { aff: 34, sync: 40, days: 12, moments: [['mStage', 1, 3], ['mMet', null, 12]] },
+  doyun: { aff: 0, sync: 10, days: 0, pinned: true, moments: [['mMet', null, 0]] },
+  wenxu: { aff: 0, sync: 10, days: 0, moments: [['mMet', null, 0]] },
+  chengshuo: { aff: 0, sync: 10, days: 0, moments: [['mMet', null, 0]] },
 };
 function charSeed(c, now) {
   const p = PRESET[c.id] || { aff: 5, sync: 10, days: 0, moments: [] };
