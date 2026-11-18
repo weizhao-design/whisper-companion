@@ -217,7 +217,7 @@ export const COLD_OPEN = {
         ] } },
     ],
   },
-  // Ji Yu and Lin You are added later from Discover; they open the same way (no story beats yet).
+  // Ji Yu and Lin You are added later from Discover; they open the same way, with their own story beats.
   jiyu: {
     minutesAgo: 1,
     voice: true,
@@ -237,6 +237,47 @@ export const COLD_OPEN = {
     memory: { zh: '你站在他演出的第一排，没有跟着唱。', en: 'You stood in the front row at his gig and didn’t sing along.' },
     note: { zh: '你站在他演出的第一排，没有跟着唱', en: 'you stood in the front row at his gig and didn’t sing along' },
     scene: 'You have only just started talking. Last night the user stood in the front row at your gig and was the only one not singing along; they scanned the band’s QR code afterwards, so you found them and messaged them, a little defensive about it. Do not act as if you already know each other well.',
+    beats: [
+      { id: 'invite', day: 3,
+        first: { zh: ['哦，你来了。', '新歌写完了，缺个听众。', '……你不是爱听歌词吗？这周末来排练室，第一个听。'], en: ['Oh. You.', 'Finished a new song. Need someone to hear it.', '…You’re into lyrics, right? Come by the rehearsal room this weekend. You’re first.'] },
+        nodes: { root: [
+          { label: { zh: '去！', en: 'I’m in!' }, choice: 'go', aff: 25,
+            reply: { zh: ['哦。', '……别迟到。迟到我也会等，但会骂你。'], en: ['K.', '…Don’t be late. I’ll wait anyway, but I’ll complain.'] },
+            memory: { zh: '你答应这周末去排练室，第一个听他的新歌。', en: 'You said you’d come to the rehearsal room this weekend and hear his new song first.' } },
+          { label: { zh: '我考虑一下', en: 'Let me think about it' }, choice: 'maybe', aff: 25,
+            reply: { zh: ['行吧。', '想来就来。门不锁。'], en: ['Fine.', 'Come if you want. Door’s unlocked.'] },
+            memory: { zh: '他约你去排练室听新歌，你说考虑一下。', en: 'He invited you to the rehearsal room to hear his new song; you said you’d think about it.' } },
+        ] } },
+      { id: 'lyric', day: 5, after: 'invite',
+        firstBy: {
+          go: { zh: ['那天你听完，一句话都没说。', '……副歌那句，我改了。'], en: ['You didn’t say a word after you heard it.', '…I changed a line in the chorus.'] },
+          maybe: { zh: ['那首新歌，你还没听。', '……副歌那句，我先改了。'], en: ['You still haven’t heard the new song.', '…I already changed a line in the chorus.'] },
+        },
+        nodes: {
+          go: [
+            { label: { zh: '改成什么了？', en: 'Changed it to what?' }, aff: 50, reply: { zh: ['啧，不告诉你。', '……反正跟第一排有关。'], en: ['Tch. Not telling.', '…Let’s just say it’s about the front row.'] },
+              memory: { zh: '他把新歌副歌改了一句，不肯告诉你改成了什么。', en: 'He changed a line in the chorus of his new song and won’t tell you what it says.' } },
+            { label: { zh: '我想再听一遍', en: 'Play it again for me' }, aff: 50, reply: { zh: ['……哦。', '下次演出，你站第一排。我唱给你听。'], en: ['…K.', 'Next gig, you stand in the front row. I’ll sing it to you.'] },
+              memory: { zh: '他把新歌副歌改了一句，不肯告诉你改成了什么。', en: 'He changed a line in the chorus of his new song and won’t tell you what it says.' } },
+          ],
+          maybe: [
+            { label: { zh: '改成什么了？', en: 'Changed it to what?' }, aff: 50, reply: { zh: ['啧，不告诉你。', '……反正跟第一排有关。'], en: ['Tch. Not telling.', '…Let’s just say it’s about the front row.'] },
+              memory: { zh: '他把新歌副歌改了一句，不肯告诉你改成了什么。', en: 'He changed a line in the chorus of his new song and won’t tell you what it says.' } },
+            { label: { zh: '下次我一定去', en: 'I’ll come next time' }, aff: 50, reply: { zh: ['……哦。', '那首我先不唱，留到你来。'], en: ['…K.', 'Then I won’t play it yet. I’ll save it for when you come.'] },
+              memory: { zh: '他把新歌副歌改了一句，不肯告诉你改成了什么。', en: 'He changed a line in the chorus of his new song and won’t tell you what it says.' } },
+          ],
+        } },
+      { id: 'confess', day: 9, sticky: true,
+        first: { zh: ['……只说一遍。', '新歌副歌改的那句，是写给你的。', '听懂了吗？不许笑。'], en: ['…I’m only saying this once.', 'The line I changed in the chorus was written for you.', 'Got it? Don’t laugh.'] },
+        nodes: { root: [
+          { label: { zh: '我也是', en: 'Me too' }, effect: 'accept',
+            reply: { zh: ['……哦。', '行了吧。以后每场演出，第一排都是你的。'], en: ['…Oh.', 'There. From now on, the front row is yours. Every gig.'] },
+            memory: { zh: '他说，新歌副歌改的那句是写给你的。你说，你也是。', en: 'He said the line he changed in the chorus was written for you. You said you feel the same.' } },
+          { label: { zh: '……再说吧', en: '…Let’s see' }, effect: 'deflect',
+            reply: { zh: ['啧。', '……行。那首歌我先不唱，等你想好。'], en: ['Tch.', '…Fine. I won’t play that song till you’ve made up your mind.'] },
+            memory: { zh: '他说，新歌副歌改的那句是写给你的。你说，再说吧。', en: 'He said the line he changed in the chorus was written for you. You said, let’s see.' } },
+        ] } },
+    ],
   },
 
   linyou: {
@@ -257,5 +298,46 @@ export const COLD_OPEN = {
     memory: { zh: '他在河边拍日落时，你走进了他的画面。', en: 'You walked into his frame while he was shooting the sunset by the river.' },
     note: { zh: '你走进了他拍日落的画面', en: 'you walked into his sunset shot' },
     scene: 'You have only just started talking. While you were shooting the sunset by the river, the user walked into your frame; you messaged to share the photo and offered to delete it if they mind. Do not act as if you already know each other well.',
+    beats: [
+      { id: 'invite', day: 3,
+        first: { zh: ['嘿嘿，你来啦！今天的光超好看～', '我的人像作业还缺一个模特……', '这周末早上，河边，就是拍日落那里。你愿意来吗？'], en: ['Hehe, you’re here! The light is gorgeous today～', 'My portrait assignment still needs a model…', 'This weekend, early morning, by the river where I shot the sunset. Would you come?'] },
+        nodes: { root: [
+          { label: { zh: '好呀', en: 'Sure!' }, choice: 'go', aff: 25,
+            reply: { zh: ['真的吗！！', '那这卷胶片都留给你～早上六点半，不要忘了哦！'], en: ['Really?!', 'Then I’m saving the whole roll for you～ Six thirty in the morning, don’t forget!'] },
+            memory: { zh: '你答应这周末早上去河边，给他的人像作业当模特。', en: 'You agreed to model for his portrait assignment by the river one morning this weekend.' } },
+          { label: { zh: '我怕拍不好', en: 'I’m not photogenic' }, choice: 'maybe', aff: 25,
+            reply: { zh: ['不会的！上次那张就很好看～', '那先不拍你，来河边看我拍，好不好？'], en: ['No way! That last one was lovely～', 'Okay, no photos of you. Just come watch me shoot by the river?'] },
+            memory: { zh: '他想请你给人像作业当模特，你说怕拍不好。', en: 'He asked you to model for his portrait assignment; you said you’re not photogenic.' } },
+        ] } },
+      { id: 'darkroom', day: 5, after: 'invite',
+        firstBy: {
+          go: { zh: ['今天在暗房把那卷胶片冲出来了！', '……三十六张，有三十张是你。嘿嘿，剩下六张是河。'], en: ['Developed that roll in the darkroom today!', '…Thirty-six shots, and thirty of them are you. Hehe, the other six are the river.'] },
+          maybe: { zh: ['今天在暗房冲胶片了～', '……第一次见面那张，我放大洗了出来。不知道为什么，就是想洗。'], en: ['I was in the darkroom developing film today～', '…I made a big print of the photo from the day we met. Don’t know why. I just wanted to.'] },
+        },
+        nodes: {
+          go: [
+            { label: { zh: '给我看看', en: 'Show me' }, aff: 50, reply: { zh: ['等一下～我挑一张最好看的！', '……挑不出来。每一张都想给你看。'], en: ['Wait～ let me pick the best one!', '…I can’t. I want to show you every single one.'] },
+              memory: { zh: '他冲出来的那卷胶片，三十张是你。', en: 'Thirty shots on the roll he developed are of you.' } },
+            { label: { zh: '都是我？', en: 'All of me?' }, aff: 50, reply: { zh: ['嗯！', '你站在光里的时候，我就忘了拍河了。'], en: ['Yep!', 'When you stand in the light, I forget all about the river.'] },
+              memory: { zh: '他冲出来的那卷胶片，三十张是你。', en: 'Thirty shots on the roll he developed are of you.' } },
+          ],
+          maybe: [
+            { label: { zh: '给我看看', en: 'Show me' }, aff: 50, reply: { zh: ['嘿嘿，等一下～', '……还是你本人比照片好看。'], en: ['Hehe, wait～', '…You still look better in person than in the photo.'] },
+              memory: { zh: '他把第一次见面那张照片放大洗了出来。', en: 'He made a big print of the photo from the day you met.' } },
+            { label: { zh: '为什么放大？', en: 'Why print it big?' }, aff: 50, reply: { zh: ['因为……小的看不清你。', '嘿嘿，这个理由可以吗？'], en: ['Because… the small one doesn’t show you properly.', 'Hehe, is that a good enough reason?'] },
+              memory: { zh: '他把第一次见面那张照片放大洗了出来。', en: 'He made a big print of the photo from the day you met.' } },
+          ],
+        } },
+      { id: 'confess', day: 9, sticky: true,
+        first: { zh: ['那个……我的毕业作品，主题定好了。', '每天拍一张“今天的光”。', '……我想让每一张里，都有你。'], en: ['So… I’ve picked the theme for my graduation project.', 'One photo of “today’s light”, every day.', '…And I want you in every single one.'] },
+        nodes: { root: [
+          { label: { zh: '我也是', en: 'Me too' }, effect: 'accept',
+            reply: { zh: ['诶？！真、真的吗？', '那从今天起，你就是我的模特啦。只是我的～'], en: ['Eh?! R-really?', 'Then from today, you’re my model. Only mine～'] },
+            memory: { zh: '他说，毕业作品想每一张都有你。你说，你也是。', en: 'He said he wants you in every photo of his graduation project. You said you feel the same.' } },
+          { label: { zh: '……再说吧', en: '…Let’s see' }, effect: 'deflect',
+            reply: { zh: ['嗯！不着急～', '那我先拍光。你想好了，再走进画面里就好。'], en: ['Okay! No rush～', 'I’ll shoot the light for now. When you’re ready, just walk into the frame.'] },
+            memory: { zh: '他说，毕业作品想每一张都有你。你说，再说吧。', en: 'He said he wants you in every photo of his graduation project. You said, let’s see.' } },
+        ] } },
+    ],
   },
 };

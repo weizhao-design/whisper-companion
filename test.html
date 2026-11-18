@@ -55,7 +55,7 @@
 <script type="module">
 // Play test for the Whisper companion app. Everything stays in this browser: the tester's own
 // app data is backed up before the test and can be restored at the end.
-import { CHARACTERS } from './js/data.js?v=35';
+import { CHARACTERS } from './js/data.js?v=36';
 
 const APP_KEY = 'whisper.v1', BACKUP_KEY = 'whisper.v1.before-test', LOG_KEY = 'whisper.test.logs';
 const MEM_ID = 'fixture-strawberry';
@@ -103,7 +103,7 @@ function event(type, data = {}) { if (log) log.events.push({ t: Math.round((now(
 async function loadFixture() {
   try { const cur = localStorage.getItem(APP_KEY); if (cur && !localStorage.getItem(BACKUP_KEY)) localStorage.setItem(BACKUP_KEY, cur); } catch (e) {}
   localStorage.removeItem(APP_KEY);
-  const store = await import('./js/store.js?v=35&fixture=' + now());
+  const store = await import('./js/store.js?v=36&fixture=' + now());
   store.update(s => {
     s.onboarded = true;
     s.settings.lang = lang; s.settings.autoplay = false; s.settings.proactive = false; s.settings.aiMode = 'demo';
