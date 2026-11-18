@@ -42,7 +42,7 @@ async function battery() {
   let level = 0.82;
   try { if (navigator.getBattery) { const b = await navigator.getBattery(); level = b.level; b.onlevelchange = () => setLvl(b.level); } } catch (e) {}
   setLvl(level);
-  function setLvl(l) { bar.setAttribute('width', Math.max(2, 19.6 * l).toFixed(1)); bar.style.fill = l <= 0.2 ? '#E5484D' : 'currentColor'; }
+  function setLvl(l) { bar.setAttribute('width', Math.max(2, 20.5 * l).toFixed(1)); bar.style.fill = l <= 0.2 ? '#E5484D' : 'currentColor'; }
 }
 
 fit(); clock(); battery();

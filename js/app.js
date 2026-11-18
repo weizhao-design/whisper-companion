@@ -1,11 +1,11 @@
-import { t, L, setLang, getLang } from './i18n.js?v=31';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=31';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=31';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=31';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=31';
-import { claudeReply } from './claude.js?v=31';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=31';
-import { COLD_OPEN } from './coldopen.js?v=31';
+import { t, L, setLang, getLang } from './i18n.js?v=32';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=32';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=32';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=32';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=32';
+import { claudeReply } from './claude.js?v=32';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=32';
+import { COLD_OPEN } from './coldopen.js?v=32';
 
 const app = document.getElementById('app');
 const S = () => getState();
