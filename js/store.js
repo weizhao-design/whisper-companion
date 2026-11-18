@@ -1,7 +1,11 @@
 // App state, persisted to localStorage on this device only.
-import { CHARACTERS } from './data.js?v=32';
+import { CHARACTERS } from './data.js?v=33';
 
-const KEY = 'whisper.v1';
+// ?fresh=1 (the portfolio's "replay the first launch" link) uses its own storage and starts empty
+// every time, so a visitor can see the splash and onboarding again without losing their own data.
+const FRESH = new URLSearchParams(location.search).get('fresh') === '1';
+const KEY = FRESH ? 'whisper.v1.fresh' : 'whisper.v1';
+if (FRESH) { try { localStorage.removeItem(KEY); sessionStorage.removeItem('whisper.splashed'); } catch (e) {} }
 export const STAGES = [0, 25, 50, 80, 101];
 
 function seed() {

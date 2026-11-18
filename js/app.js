@@ -1,11 +1,11 @@
-import { t, L, setLang, getLang } from './i18n.js?v=32';
-import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=32';
-import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=32';
-import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=32';
-import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=32';
-import { claudeReply } from './claude.js?v=32';
-import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=32';
-import { COLD_OPEN } from './coldopen.js?v=32';
+import { t, L, setLang, getLang } from './i18n.js?v=33';
+import { CHARACTERS, GIFTS, CARES, getChar, nowDoing, isBusy } from './data.js?v=33';
+import { getState, update, subscribe, stageOf, stageProgress, newId, audioCache, resetAll, save } from './store.js?v=33';
+import { portrait, userAvatar, USER_AVATARS, escapeHtml as esc } from './avatar.js?v=33';
+import { demoReply, replyLangFor, proactiveLine } from './demo-ai.js?v=33';
+import { claudeReply } from './claude.js?v=33';
+import { Recorder, speak, stopSpeaking, estDur, sttSupported } from './voice.js?v=33';
+import { COLD_OPEN } from './coldopen.js?v=33';
 
 const app = document.getElementById('app');
 const S = () => getState();
@@ -183,23 +183,31 @@ function notifStack(list) {
 function showSplash() {
   if (new URLSearchParams(location.search).get('nosplash') === '1') return;
   const fresh = !S().onboarded; const lang = getLang();
+  // returning users see it once per visit, not on every reload
+  if (!fresh) { try { if (sessionStorage.getItem('whisper.splashed')) return; sessionStorage.setItem('whisper.splashed', '1'); } catch (e) {} }
   const host = document.body.classList.contains('device') ? $('#screen') : document.body;
   const el = document.createElement('div');
   el.className = 'splash' + (fresh ? ' fresh' : '') + (host === document.body ? ' fixed' : '');
   const list = fresh ? unreadPreviews(lang) : [];
   el.innerHTML = `<div class="sp-glow"></div><div class="sp-icon">${splashMark()}</div><div class="sp-word">${t('appName')}</div><div class="sp-tag">${t('spTag')}</div>
     ${fresh ? `<div class="sp-notifs">${notifStack(list)}<p class="sp-hint">${t('spUnread', { n: list.length })}</p></div>` : ''}`;
+  // keyboard and screen readers: it is a button; Enter, Space or Esc does what a tap does
+  el.setAttribute('role', 'button'); el.tabIndex = 0; el.setAttribute('aria-label', fresh ? t('spUnread', { n: list.length }) : t('spSkip'));
   host.appendChild(el);
+  try { el.focus({ preventScroll: true }); } catch (e) {}
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 380); };
+  const close = () => { el.classList.add('out'); setTimeout(() => el.remove(), 380); if (fresh) setTimeout(() => $('#ob-name')?.focus(), 400); };
+  let act;
   if (fresh) {
     const showN = () => el.classList.add('show-n');
     const timer = setTimeout(showN, reduce ? 300 : 2100);
-    el.addEventListener('click', () => { if (!el.classList.contains('show-n')) { clearTimeout(timer); showN(); } else close(); });
+    act = () => { if (!el.classList.contains('show-n')) { clearTimeout(timer); showN(); } else close(); };
   } else {
     const timer = setTimeout(close, reduce ? 500 : 2300);
-    el.addEventListener('click', () => { clearTimeout(timer); close(); });
+    act = () => { clearTimeout(timer); close(); };
   }
+  el.addEventListener('click', act);
+  el.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') { e.preventDefault(); e.key === 'Escape' && fresh ? close() : act(); } });
 }
 
 // ======================= ONBOARDING =======================
@@ -221,7 +229,8 @@ function screenOnboard() {
     ? `<form class="ob-in" id="ob-form"><input id="ob-name" type="text" maxlength="12" autocomplete="off" placeholder="${t('namePh')}" value="${esc(ob.name)}" aria-label="${t('whatName')}"><button class="ob-send" aria-label="${lang === 'zh' ? '发送' : 'Send'}"><svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button></form>`
     : step === 'age'
       ? `<div class="qr"><button data-act="obAge" data-v="adult">${t('obAdult')}</button><button data-act="obAge" data-v="minor">${t('obMinor')}</button></div><p class="ob-note">${t('obAiNote')}</p>`
-      : step === 'ready' ? `<div class="ob-go"><button class="btn p block" data-act="obGo">${t('obGo')}</button></div>` : '<div class="ob-go"></div>';
+      : step === 'ready' ? `<div class="ob-go"><button class="btn p block" data-act="obGo">${t('obGo')}</button></div>`
+        : `<div class="ob-go"><button class="ob-back" data-act="obBack">${t('obBack')}</button></div>`;
   return `<div class="ob">
     <div class="ob-top"><div class="ob-peek">${notifStack(list.slice(0, 2))}</div>${list.length ? `<span class="ob-badge">${t('unreadN', { n: list.length })}</span>` : ''}
       <button class="ob-lang" data-act="obLang">中 / EN</button></div>
@@ -239,6 +248,7 @@ function bindOnboard() {
 }
 ACT.obLang = () => { const inp = $('#ob-name'); if (inp && ui.ob) ui.ob.name = inp.value.trim(); update(s => { s.settings.lang = s.settings.lang === 'zh' ? 'en' : 'zh'; }); render(); };
 ACT.obAge = el => { ui.ob.step = el.dataset.v === 'adult' ? 'ready' : 'minor'; render(); };
+ACT.obBack = () => { ui.ob.step = 'age'; render(); };
 ACT.obGo = () => { const name = ui.ob?.name || ''; ui.ob = null; finishOnboard(name); };
 function finishOnboard(name) {
     update(s => {
@@ -814,6 +824,15 @@ ACT.addChar = el => {
   const id = el.dataset.id; const c = getChar(id); const lang = getLang();
   update(s => {
     const cs = s.chars[id]; cs.owned = true; cs.metAt = Date.now(); cs.affinity = 5; cs.moments = [{ key: 'mMet', ts: Date.now() }];
+    const co = COLD_OPEN[id];
+    if (co) {
+      // added from Discover: he too starts in the middle of something, with quick replies
+      co.first[lang].forEach((text, j) => s.messages[id].push(co.voice && j === 0
+        ? { id: newId(), from: 'him', type: 'voice', text, transcript: text, dur: estDur(text, lang), lang, showText: true, ts: Date.now() + j }
+        : { id: newId(), from: 'him', type: 'text', text, lang, ts: Date.now() + j }));
+      cs.script = { at: 'root' }; cs.coldOpened = true; cs.affinity = 0;
+      return;
+    }
     const text = c.opener[lang];
     s.messages[id].push({ id: newId(), from: 'him', type: 'voice', text, transcript: text, dur: estDur(text, lang), lang, showText: true, ts: Date.now() });
   });

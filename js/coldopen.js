@@ -217,4 +217,45 @@ export const COLD_OPEN = {
         ] } },
     ],
   },
+  // Ji Yu and Lin You are added later from Discover; they open the same way (no story beats yet).
+  jiyu: {
+    minutesAgo: 1,
+    voice: true,
+    who: { zh: '季屿', en: 'Ji Yu' },
+    first: {
+      zh: ['昨晚第一排那个没跟着唱的。', '是你吧。', '……不喜欢那首？'],
+      en: ['The one in the front row last night who didn’t sing along.', 'That was you, right?', '…Didn’t like that song?'],
+    },
+    nodes: {
+      root: [
+        { label: { zh: '我在听歌词', en: 'I was listening to the lyrics' },
+          reply: { zh: ['哦。', '那首是我写的词。……行吧，算你有眼光。'], en: ['Oh.', 'I wrote those lyrics. …Fine, guess you’ve got taste.'] } },
+        { label: { zh: '你怎么知道是我？', en: 'How did you know it was me?' },
+          reply: { zh: ['第一排就那么几个人。', '你还站在灯底下。很难不看到好吗。'], en: ['There are like five people in the front row.', 'And you were standing right under the light. Kind of hard to miss.'] } },
+      ],
+    },
+    memory: { zh: '你站在他演出的第一排，没有跟着唱。', en: 'You stood in the front row at his gig and didn’t sing along.' },
+    note: { zh: '你站在他演出的第一排，没有跟着唱', en: 'you stood in the front row at his gig and didn’t sing along' },
+    scene: 'You have only just started talking. Last night the user stood in the front row at your gig and was the only one not singing along; you noticed and messaged them, a little defensive about it. Do not act as if you already know each other well.',
+  },
+
+  linyou: {
+    minutesAgo: 1,
+    who: { zh: '林柚', en: 'Lin You' },
+    first: {
+      zh: ['抱歉！刚才在河边拍日落，你走进画面里了～', '拍得太好看了，我舍不得删……要不要看看？'],
+      en: ['Sorry! I was shooting the sunset by the river and you walked into the frame～', 'It came out so good I can’t bring myself to delete it… want to see?'],
+    },
+    nodes: {
+      root: [
+        { label: { zh: '给我看看', en: 'Show me' },
+          reply: { zh: ['等一下！我先调个色～', '……好了，就这张。光正好落在你侧脸上。'], en: ['Wait! Let me fix the colours first～', '…Okay, this one. The light landed right on the side of your face.'] } },
+        { label: { zh: '你偷拍我？', en: 'You took my photo?' },
+          reply: { zh: ['不是不是！是你自己走进来的！', '……好吧，我按了三次快门。你不喜欢的话，我马上删～'], en: ['No no no! You walked into it!', '…Okay, I pressed the shutter three times. If you don’t like it, I’ll delete it right away～'] } },
+      ],
+    },
+    memory: { zh: '他在河边拍日落时，你走进了他的画面。', en: 'You walked into his frame while he was shooting the sunset by the river.' },
+    note: { zh: '你走进了他拍日落的画面', en: 'you walked into his sunset shot' },
+    scene: 'You have only just started talking. While you were shooting the sunset by the river, the user walked into your frame; you messaged to share the photo and offered to delete it if they mind. Do not act as if you already know each other well.',
+  },
 };

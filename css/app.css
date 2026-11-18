@@ -421,3 +421,6 @@ input[type=range] { accent-color: var(--acc); width: 130px; }
 .ob .qr, .ob-note, .ob-go { animation: obIn .4s 1.7s backwards; }
 .ob .qr, .ob-note, .ob-go { opacity: 1; }
 @keyframes obIn { from { opacity: 0; } to { opacity: 1; } }
+/* under-18 goodbye: a quiet way back if the wrong answer was tapped */
+.ob-back { display: block; margin: 0 auto; padding: 8px 12px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.splash:focus { outline: none; } .splash:focus-visible { outline: 2px solid var(--acc); outline-offset: -4px; }

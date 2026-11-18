@@ -1,9 +1,9 @@
 // Optional real-AI mode: calls the Claude Messages API straight from the browser
 // with the user's own key (kept in localStorage on their device).
 // Raw fetch is used because this is a build-free static site on GitHub Pages.
-import { nowDoing, isBusy } from './data.js?v=32';
-import { stageOf } from './store.js?v=32';
-import { COLD_OPEN } from './coldopen.js?v=32';
+import { nowDoing, isBusy } from './data.js?v=33';
+import { stageOf } from './store.js?v=33';
+import { COLD_OPEN } from './coldopen.js?v=33';
 
 const MODEL = 'claude-opus-5-5';
 const STAGE_EN = ['strangers who just met', 'friends getting comfortable', 'flirting — clearly into each other but not official', 'mutual feelings, openly affectionate'];
