@@ -1,6 +1,6 @@
 // App-shell cache so the demo opens offline after the first visit.
-const CACHE = 'whisper-v35';
-const SHELL = ['./', 'index.html', 'css/app.css?v=34', 'js/app.js?v=34', 'js/device.js?v=34', 'js/i18n.js', 'js/data.js', 'js/store.js', 'js/avatar.js', 'js/demo-ai.js', 'js/claude.js', 'js/coldopen.js', 'js/voice.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
+const CACHE = 'whisper-v36';
+const SHELL = ['./', 'index.html', 'css/app.css?v=35', 'js/app.js?v=35', 'js/device.js?v=35', 'js/i18n.js', 'js/data.js', 'js/store.js', 'js/avatar.js', 'js/demo-ai.js', 'js/claude.js', 'js/coldopen.js', 'js/voice.js', 'manifest.webmanifest', 'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png'];
 
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(SHELL)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => {
