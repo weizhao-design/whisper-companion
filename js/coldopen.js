@@ -127,20 +127,20 @@ export const COLD_OPEN = {
         ] } },
       { id: 'late', day: 5, after: 'invite',
         firstBy: {
-          go: { zh: ['今晚很长。刚交完班。', '……那家粥铺，我后来又去了一次。一个人，没那天好喝。'], en: ['Long night. Just handed over.', '…I went back to that congee place. Alone. It wasn’t as good as that night.'] },
-          maybe: { zh: ['今晚很长。刚交完班。', '……你说改天。我把那家粥铺存下来了，以防万一。'], en: ['Long night. Just handed over.', '…You said another day. I saved the congee place, just in case.'] },
+          go: { zh: ['这一夜很长。刚交完班。', '……那家粥铺，我后来又去了一次。一个人，没那天好喝。'], en: ['Long night. Just handed over.', '…I went back to that congee place. Alone. It wasn’t as good as that night.'] },
+          maybe: { zh: ['这一夜很长。刚交完班。', '……你说改天。我把那家粥铺存下来了，以防万一。'], en: ['Long night. Just handed over.', '…You said another day. I saved the congee place, just in case.'] },
         },
         nodes: {
           go: [
-            { label: { zh: '今晚辛苦了', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
+            { label: { zh: '辛苦了，快去睡', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
               memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
             { label: { zh: '下次我请你', en: 'Next time’s on me' }, aff: 50, reply: { zh: ['好。', '那我得好好排个班。'], en: ['Deal.', 'Then I’d better sort out my shifts.'] },
               memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
           ],
           maybe: [
-            { label: { zh: '今晚辛苦了', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
+            { label: { zh: '辛苦了，快去睡', en: 'Rough night. Rest up' }, aff: 50, reply: { zh: ['……嗯。', '听你这么说，就没那么累了。'], en: ['…Mm.', 'Hearing that makes it less tiring.'] },
               memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
-            { label: { zh: '改天就是这周', en: 'Another day is this week' }, aff: 50, reply: { zh: ['……好。记住了。', '这周我白班多，你挑时间。'], en: ['…Okay. Noted.', 'I’m mostly on days this week. You pick.'] },
+            { label: { zh: '改天就是这周', en: 'This week, then' }, aff: 50, reply: { zh: ['……好。记住了。', '这周我白班多，你挑时间。'], en: ['…Okay. Noted.', 'I’m mostly on days this week. You pick.'] },
               memory: { zh: '他交完夜班，第一个想找的人是你。', en: 'After a night shift, you were the first person he wanted to talk to.' } },
           ],
         } },
